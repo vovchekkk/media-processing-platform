@@ -1,0 +1,9 @@
+# config/local.yaml
+
+env: "local"
+storage_path: "./repository/postgres/postgres.db"
+http_server:
+  host: "localhost"
+  port: 8080
+  timeout: 3s
+  idle_timeout: 30s
