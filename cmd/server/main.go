@@ -3,9 +3,10 @@ package main
 import (
 	"log/slog"
 	"os"
-	"log"
 
 	"media-processing-platform/internal/config"
+	"media-processing-platform/internal/infrastructure/database"
+	"media-processing-platform/internal/repository"
 )
 
 const (
@@ -22,6 +23,11 @@ func main() {
 
 	logger.Info("initializing server", slog.String("address", cfg.Address()))
 	logger.Debug("logger debug mode enabled")
+
+	db := database.InitDB(logger)
+	taskRepository := repository.NewGormTaskRepository(db)
+
+	_ = taskRepository // Use the taskRepository as needed
 }
 
 func setupLogger(env string) *slog.Logger {
@@ -35,7 +41,7 @@ func setupLogger(env string) *slog.Logger {
 	case envProd:
 		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
 	default:
-		log.Fatalf("unknown environment: %s", env)
+		slog.Error("unknown environment", "environment", env)
 		return nil
 	}
 
