@@ -2,6 +2,8 @@ package repository
 
 import (
 	"gorm.io/gorm"
+	"github.com/google/uuid"
+
 	"media-processing-platform/internal/domain"
 )
 
@@ -19,7 +21,7 @@ func (r *gormTask) CreateTask(task *domain.Task) error {
 	return r.db.Create(task).Error
 }
 
-func (r *gormTask) GetTaskStatusByID(id string) (string, error) {
+func (r *gormTask) GetTaskStatusByID(id uuid.UUID) (domain.TaskStatus, error) {
 	var task domain.Task
 
 	err := r.db.Select("status").First(&task, "id = ?", id).Error
@@ -27,10 +29,10 @@ func (r *gormTask) GetTaskStatusByID(id string) (string, error) {
 		return "", err
 	}
 
-	return task.Status, nil
+	return domain.TaskStatus(task.Status), nil
 }
 
-func (r *gormTask) GetTaskResultByID(id string) (string, error) {
+func (r *gormTask) GetTaskResultByID(id uuid.UUID) (string, error) {
 	var task domain.Task
 
 	err := r.db.Select("result").First(&task, "id = ?", id).Error

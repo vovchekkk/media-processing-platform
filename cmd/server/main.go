@@ -2,11 +2,16 @@ package main
 
 import (
 	"log/slog"
+	"net/http"
 	"os"
+
+	"github.com/go-playground/validator"
 
 	"media-processing-platform/internal/config"
 	"media-processing-platform/internal/infrastructure/database"
 	"media-processing-platform/internal/repository"
+	_ "media-processing-platform/docs"
+	router "media-processing-platform/internal/delivery/http"
 )
 
 const (
@@ -25,9 +30,19 @@ func main() {
 	logger.Debug("logger debug mode enabled")
 
 	db := database.InitDB(logger)
+
 	taskRepository := repository.NewGormTaskRepository(db)
 
-	_ = taskRepository // Use the taskRepository as needed
+	validate := validator.New()
+
+	appRouter := router.InitRouter(logger, taskRepository, validate)
+
+	logger.Info("starting server", slog.String("address", cfg.Address()))
+
+	if err := http.ListenAndServe(cfg.Address(), appRouter); err != nil {
+		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
 }
 
 func setupLogger(env string) *slog.Logger {

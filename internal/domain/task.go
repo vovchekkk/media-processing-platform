@@ -1,11 +1,18 @@
 package domain
 
+import "github.com/google/uuid"
+
+type TaskStatus string
+
+const (
+	StatusPending    TaskStatus = "pending"
+	StatusProcessing TaskStatus = "processing"
+	StatusCompleted  TaskStatus = "completed"
+	StatusFailed     TaskStatus = "failed"
+)
+
 type Task struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	Status      string `json:"status"`
-	Result      string `json:"result"`
-	CreatedAt   string `json:"created_at"`
-	UpdatedAt   string `json:"updated_at"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey;"` 
+	Status    string    `gorm:"type:varchar(20);default:'pending'"`
+	Result    string    `gorm:"type:text"`
 }

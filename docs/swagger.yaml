@@ -1,0 +1,53 @@
+definitions:
+  media-processing-platform_internal_delivery_http_shared.Response:
+    properties:
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  task.CreateRequest:
+    type: object
+  task.CreateResponse:
+    properties:
+      error:
+        type: string
+      id:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/tasks/:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new media processing task
+      parameters:
+      - description: Task creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/task.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/task.CreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      summary: Create task
+      tags:
+      - tasks
+swagger: "2.0"
