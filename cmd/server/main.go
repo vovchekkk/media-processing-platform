@@ -7,11 +7,12 @@ import (
 
 	"github.com/go-playground/validator"
 
+	_ "media-processing-platform/docs"
 	"media-processing-platform/internal/config"
+	router "media-processing-platform/internal/delivery/http"
 	"media-processing-platform/internal/infrastructure/database"
 	"media-processing-platform/internal/repository"
-	_ "media-processing-platform/docs"
-	router "media-processing-platform/internal/delivery/http"
+	"media-processing-platform/internal/service"
 )
 
 const (
@@ -35,7 +36,9 @@ func main() {
 
 	validate := validator.New()
 
-	appRouter := router.InitRouter(logger, taskRepository, validate)
+	taskProcessor := service.NewTaskProcessor(cfg.TaskProcessorConfig, taskRepository, logger)
+
+	appRouter := router.InitRouter(logger, taskRepository, validate, taskProcessor)
 
 	logger.Info("starting server", slog.String("address", cfg.Address()))
 

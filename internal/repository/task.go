@@ -12,4 +12,8 @@ type Task interface {
 	GetTaskStatusByID(id uuid.UUID) (domain.TaskStatus, error)
 
 	GetTaskResultByID(id uuid.UUID) (string, error)
+
+	UpdateTaskStatus(id uuid.UUID, status domain.TaskStatus) error
+
+	SetTaskResult(id uuid.UUID, result string) error
 }

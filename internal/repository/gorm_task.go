@@ -42,3 +42,11 @@ func (r *gormTask) GetTaskResultByID(id uuid.UUID) (string, error) {
 
 	return task.Result, nil
 }
+
+func (r *gormTask) UpdateTaskStatus(id uuid.UUID, status domain.TaskStatus) error {
+	return r.db.Model(&domain.Task{}).Where("id = ?", id).Update("status", status).Error
+}
+
+func (r *gormTask) SetTaskResult(id uuid.UUID, result string) error {
+	return r.db.Model(&domain.Task{}).Where("id = ?", id).Update("result", result).Error
+}

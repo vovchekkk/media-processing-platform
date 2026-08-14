@@ -1,7 +1,7 @@
-package http
+package shared
 
 type Response struct {
-	Status  string      `json:"status"`
+	ResponseStatus  string      `json:"status"`
 	Error  string      `json:"error,omitempty"`
 }
 
@@ -12,13 +12,13 @@ const (
 
 func Error(msg string) Response {
 	return Response{
-		Status: StatusError,
+		ResponseStatus: StatusError,
 		Error:  msg,
 	}
 }
 
 func Success() Response {
 	return Response{
-		Status: StatusSuccess,
+		ResponseStatus: StatusSuccess,
 	}
 }

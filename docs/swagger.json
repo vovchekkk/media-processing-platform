@@ -24,7 +24,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/task.CreateRequest"
+                            "$ref": "#/definitions/internal_delivery_http_task.CreateRequest"
                         }
                     }
                 ],
@@ -32,7 +32,91 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/task.CreateResponse"
+                            "$ref": "#/definitions/internal_delivery_http_task.CreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/result/{task_id}/": {
+            "get": {
+                "description": "Returns the processing result of a task by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task result",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Task UUID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_http_task.GetResultResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/tasks/status/{task_id}/": {
+            "get": {
+                "description": "Returns the current processing status of a task by its ID",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Get task status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Task UUID",
+                        "name": "task_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_http_task.GetStatusResponse"
                         }
                     },
                     "400": {
@@ -52,6 +136,51 @@
         }
     },
     "definitions": {
+        "internal_delivery_http_task.CreateRequest": {
+            "type": "object"
+        },
+        "internal_delivery_http_task.CreateResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_delivery_http_task.GetResultResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_delivery_http_task.GetStatusResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "task_status": {
+                    "$ref": "#/definitions/media-processing-platform_internal_domain.TaskStatus"
+                }
+            }
+        },
         "media-processing-platform_internal_delivery_http_shared.Response": {
             "type": "object",
             "properties": {
@@ -63,22 +192,16 @@
                 }
             }
         },
-        "task.CreateRequest": {
-            "type": "object"
-        },
-        "task.CreateResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                }
-            }
+        "media-processing-platform_internal_domain.TaskStatus": {
+            "type": "string",
+            "enum": [
+                "in_progress",
+                "ready"
+            ],
+            "x-enum-varnames": [
+                "StatusInProgress",
+                "StatusReady"
+            ]
         }
     }
 }

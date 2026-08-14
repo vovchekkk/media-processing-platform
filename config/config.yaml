@@ -7,3 +7,5 @@ http_server:
   port: 8080
   timeout: 3s
   idle_timeout: 30s
+task_processor:
+  processing_duration: 30s

@@ -14,6 +14,7 @@ type Config struct {
 	Env string `yaml:"env" env-default:"development"`
 	StoragePath string `yaml:"storage_path" env-required:"true"`
 	HTTPServer `yaml:"http_server"`
+	TaskProcessorConfig `yaml:"task_processor"`
 }
 
 type HTTPServer struct {
@@ -25,6 +26,10 @@ type HTTPServer struct {
 
 func (s HTTPServer) Address() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
+}
+
+type TaskProcessorConfig struct {
+	ProcessingDuration time.Duration `yaml:"processing_duration" env-default:"30s"`
 }
 
 func MustLoad() *Config {
