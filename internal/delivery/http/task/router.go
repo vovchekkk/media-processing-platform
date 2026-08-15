@@ -14,9 +14,9 @@ import (
 func InitRouter(log *slog.Logger, taskRepo repository.Task, validate *validator.Validate, taskProcessor *service.TaskProcessor) http.Handler {
 	router := chi.NewRouter()
 
-	router.Post("/", NewCreateHandler(log, taskRepo, validate, taskProcessor))
-	router.Get("/status/{task_id}/", NewGetStatusHandler(log, taskRepo, validate))
-	router.Get("/result/{task_id}/", NewGetResultHandler(log, taskRepo, validate))
+	router.Post("/task", NewCreateHandler(log, taskRepo, validate, taskProcessor))
+	router.Get("/status/{task_id}", NewGetStatusHandler(log, taskRepo, validate))
+	router.Get("/result/{task_id}", NewGetResultHandler(log, taskRepo, validate))
 
 	return router
 }

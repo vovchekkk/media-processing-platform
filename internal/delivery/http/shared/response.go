@@ -1,7 +1,7 @@
 package shared
 
 type Response struct {
-	ResponseStatus  string      `json:"status"`
+	ResponseStatus  string      `json:"response_status"`
 	Error  string      `json:"error,omitempty"`
 }
 

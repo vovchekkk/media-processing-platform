@@ -30,7 +30,7 @@ func main() {
 	logger.Info("initializing server", slog.String("address", cfg.Address()))
 	logger.Debug("logger debug mode enabled")
 
-	db := database.InitDB(logger)
+	db := database.InitDB(cfg.DatabaseConfig, logger)
 
 	taskRepository := repository.NewGormTaskRepository(db)
 

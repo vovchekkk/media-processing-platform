@@ -6,6 +6,7 @@ import (
 	"time"
 	"net"
 	"strconv"
+	"fmt"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
@@ -15,6 +16,7 @@ type Config struct {
 	StoragePath string `yaml:"storage_path" env-required:"true"`
 	HTTPServer `yaml:"http_server"`
 	TaskProcessorConfig `yaml:"task_processor"`
+	DatabaseConfig `yaml:"db"`
 }
 
 type HTTPServer struct {
@@ -32,6 +34,25 @@ type TaskProcessorConfig struct {
 	ProcessingDuration time.Duration `yaml:"processing_duration" env-default:"30s"`
 }
 
+type DatabaseConfig struct {
+	Host string `yaml:"host" env:"DB_HOST" env-required:"true"`
+	User string `yaml:"user" env:"DB_USER" env-required:"true"`
+	Password string `yaml:"password" env:"DB_PASSWORD" env-required:"true"`
+	DBName string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
+	Port string `yaml:"port" env:"DB_PORT" env-required:"true"`
+	SSLMode string `yaml:"sslmode" end:"DB_SSL_MODE" env-required:"true"`
+}
+
+func (dbConfig DatabaseConfig) DSN() string {
+	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		dbConfig.Host,
+		dbConfig.User,
+		dbConfig.Password,
+		dbConfig.DBName,
+		dbConfig.Port,
+		dbConfig.SSLMode)
+}
+
 func MustLoad() *Config {
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
@@ -44,9 +65,12 @@ func MustLoad() *Config {
 
 	var cfg Config
 
-	err := cleanenv.ReadConfig(configPath, &cfg)
-	if err != nil {
+	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("error reading config file: %s", err)
+	}
+	
+	if err := cleanenv.ReadEnv(&cfg); err != nil {
+		log.Fatalf("error reading env variables: %s", err)
 	}
 
 	return &cfg

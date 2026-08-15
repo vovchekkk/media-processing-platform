@@ -3,9 +3,16 @@
 env: "local"
 storage_path: "./repository/postgres/postgres.db"
 http_server:
-  host: "localhost"
-  port: 8080
+  host: "0.0.0.0"
+  port: 8000
   timeout: 3s
   idle_timeout: 30s
+db:
+  host: "host.docker.internal"
+  user: "user"
+  password: "password"
+  dbname: "postgres"
+  port: "5433"
+  sslmode: "disable"
 task_processor:
   processing_duration: 30s

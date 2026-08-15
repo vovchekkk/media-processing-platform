@@ -15,53 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/tasks/": {
-            "post": {
-                "description": "Creates a new media processing task",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "tasks"
-                ],
-                "summary": "Create task",
-                "parameters": [
-                    {
-                        "description": "Task creation request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/internal_delivery_http_task.CreateRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/internal_delivery_http_task.CreateResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/tasks/result/{task_id}/": {
+        "/result/{task_id}": {
             "get": {
                 "description": "Returns the processing result of a task by its ID",
                 "produces": [
@@ -103,7 +57,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/tasks/status/{task_id}/": {
+        "/status/{task_id}": {
             "get": {
                 "description": "Returns the current processing status of a task by its ID",
                 "produces": [
@@ -144,6 +98,52 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/task": {
+            "post": {
+                "description": "Creates a new media processing task",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tasks"
+                ],
+                "summary": "Create task",
+                "parameters": [
+                    {
+                        "description": "Task creation request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_http_task.CreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/internal_delivery_http_task.CreateResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -153,12 +153,6 @@ const docTemplate = `{
         "internal_delivery_http_task.CreateResponse": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "status": {
-                    "type": "string"
-                },
                 "task_id": {
                     "type": "string"
                 }
@@ -167,13 +161,7 @@ const docTemplate = `{
         "internal_delivery_http_task.GetResultResponse": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                },
                 "result": {
-                    "type": "string"
-                },
-                "status": {
                     "type": "string"
                 }
             }
@@ -181,13 +169,7 @@ const docTemplate = `{
         "internal_delivery_http_task.GetStatusResponse": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                },
                 "status": {
-                    "type": "string"
-                },
-                "task_status": {
                     "$ref": "#/definitions/media-processing-platform_internal_domain.TaskStatus"
                 }
             }
@@ -198,7 +180,7 @@ const docTemplate = `{
                 "error": {
                     "type": "string"
                 },
-                "status": {
+                "response_status": {
                     "type": "string"
                 }
             }

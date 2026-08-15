@@ -1,6 +1,8 @@
 package task
 
 import (
+	"errors"
+	"gorm.io/gorm"
 	"log/slog"
 	"net/http"
 
@@ -21,7 +23,7 @@ import (
 // @Success 200 {object} GetStatusResponse
 // @Failure 400 {object} resp.Response
 // @Failure 500 {object} resp.Response
-// @Router /api/tasks/status/{task_id}/ [get]
+// @Router /status/{task_id} [get]
 func NewGetStatusHandler(log *slog.Logger, taskRepository repository.Task, validate *validator.Validate) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := resp.BindPathUUID(w, r, log, "task_id")
@@ -31,10 +33,16 @@ func NewGetStatusHandler(log *slog.Logger, taskRepository repository.Task, valid
 
 		result, err := taskRepository.GetTaskStatusByID(id)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				render.Status(r, http.StatusNotFound)
+				render.JSON(w, r, resp.Error("task not found"))
+				return
+			}
+
 			log.Error("failed to get task status", "error", err)
 
+			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, resp.Error("failed to get task status"))
-
 			return
 		}
 
@@ -47,6 +55,5 @@ func NewGetStatusHandler(log *slog.Logger, taskRepository repository.Task, valid
 func getStatusRespondOK(w http.ResponseWriter, r *http.Request, status domain.TaskStatus) {
 	render.JSON(w, r, GetStatusResponse{
 		TaskStatus: status,
-		Response: resp.Success(),
 	})
 }

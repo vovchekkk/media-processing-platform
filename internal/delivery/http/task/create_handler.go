@@ -21,10 +21,10 @@ import (
 // @Accept json
 // @Produce json
 // @Param request body CreateRequest true "Task creation request"
-// @Success 200 {object} CreateResponse
+// @Success 201 {object} CreateResponse
 // @Failure 400 {object} resp.Response
 // @Failure 500 {object} resp.Response
-// @Router /api/tasks/ [post]
+// @Router /task [post]
 func NewCreateHandler(log *slog.Logger, taskRepository repository.Task, validate *validator.Validate, taskProcessor *service.TaskProcessor) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := uuid.NewRandom()
@@ -59,8 +59,9 @@ func NewCreateHandler(log *slog.Logger, taskRepository repository.Task, validate
 }
 
 func createRespondOK(w http.ResponseWriter, r *http.Request, id uuid.UUID) {
+	w.WriteHeader(http.StatusCreated)
+
 	render.JSON(w, r, CreateResponse{
 		ID: id,
-		Response: resp.Success(),
 	})
 }

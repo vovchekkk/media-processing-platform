@@ -27,8 +27,8 @@ func InitRouter(log *slog.Logger, taskRepo repository.Task, validate *validator.
 
 	router.Get("/swagger/*", httpSwagger.Handler())
 
-	router.Route("/api", func (r chi.Router) {
-		r.Mount("/tasks", task.InitRouter(log, taskRepo, validate, taskProcessor))
+	router.Route("/", func (r chi.Router) {
+		r.Mount("/", task.InitRouter(log, taskRepo, validate, taskProcessor))
 	})
 
 	return router
