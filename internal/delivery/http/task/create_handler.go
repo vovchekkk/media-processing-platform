@@ -44,12 +44,12 @@ func NewCreateHandler(log *slog.Logger, taskRepository repository.Task, validate
 
 		if err := taskRepository.CreateTask(&task); err != nil {
 			log.Error("failed to create task", "error", err)
-			
+
 			render.JSON(w, r, resp.Error("failed to create task"))
 
 			return
 		}
-		
+
 		log.Info("task successfully created and saved")
 
 		taskProcessor.Process(id)

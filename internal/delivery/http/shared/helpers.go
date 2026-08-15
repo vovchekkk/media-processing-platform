@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+
 	"github.com/google/uuid"
 
 	"github.com/go-chi/chi/v5"
@@ -14,13 +15,13 @@ import (
 
 func BindAndValidate(w http.ResponseWriter, r *http.Request, log *slog.Logger, target any, validate *validator.Validate) bool {
 	err := render.DecodeJSON(r.Body, target)
-	
+
 	if errors.Is(err, io.EOF) {
 		log.Error("empty request body", slog.Any("error", err))
 		render.JSON(w, r, Error("empty request body"))
 		return false
 	}
-	
+
 	if err != nil {
 		log.Error("failed to decode request body", slog.Any("error", err))
 		render.JSON(w, r, Error("failed to decode request body"))

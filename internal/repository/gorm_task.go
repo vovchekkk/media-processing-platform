@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	"media-processing-platform/internal/domain"
 )

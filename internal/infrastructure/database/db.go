@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/orandin/slog-gorm"
+	slogGorm "github.com/orandin/slog-gorm"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -18,14 +18,14 @@ func InitDB(dbConfig config.DatabaseConfig, log *slog.Logger) *gorm.DB {
 
 	log.Info(
 		"database config",
-    	"host", dbConfig.Host,
-    	"port", dbConfig.Port,
-    	"dbname", dbConfig.DBName,
+		"host", dbConfig.Host,
+		"port", dbConfig.Port,
+		"dbname", dbConfig.DBName,
 	)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: slogGorm.New(
-				slogGorm.WithHandler(log.Handler()),
+			slogGorm.WithHandler(log.Handler()),
 		),
 	})
 

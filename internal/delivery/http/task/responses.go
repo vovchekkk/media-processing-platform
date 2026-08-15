@@ -7,7 +7,7 @@ import (
 )
 
 type CreateResponse struct {
-	ID     uuid.UUID `json:"task_id"`
+	ID uuid.UUID `json:"task_id"`
 }
 
 type GetStatusResponse struct {
@@ -15,5 +15,5 @@ type GetStatusResponse struct {
 }
 
 type GetResultResponse struct {
-	Result string    `json:"result"`
+	Result string `json:"result"`
 }

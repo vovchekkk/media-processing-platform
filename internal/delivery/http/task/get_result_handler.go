@@ -2,9 +2,10 @@ package task
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"log/slog"
 	"net/http"
+
+	"gorm.io/gorm"
 
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
@@ -52,6 +53,6 @@ func NewGetResultHandler(log *slog.Logger, taskRepository repository.Task, valid
 
 func getResultRespondOK(w http.ResponseWriter, r *http.Request, result string) {
 	render.JSON(w, r, GetResultResponse{
-		Result:   result,
+		Result: result,
 	})
 }

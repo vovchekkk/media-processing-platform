@@ -7,7 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-playground/validator"
-	"github.com/samber/slog-chi"
+	slogchi "github.com/samber/slog-chi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"media-processing-platform/internal/delivery/http/task"
@@ -27,7 +27,7 @@ func InitRouter(log *slog.Logger, taskRepo repository.Task, validate *validator.
 
 	router.Get("/swagger/*", httpSwagger.Handler())
 
-	router.Route("/", func (r chi.Router) {
+	router.Route("/", func(r chi.Router) {
 		r.Mount("/", task.InitRouter(log, taskRepo, validate, taskProcessor))
 	})
 

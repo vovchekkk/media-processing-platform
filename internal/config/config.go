@@ -1,28 +1,28 @@
 package config
 
 import (
-	"log"
-	"os"
-	"time"
-	"net"
-	"strconv"
 	"fmt"
+	"log"
+	"net"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Env string `yaml:"env" env-default:"development"`
-	StoragePath string `yaml:"storage_path" env-required:"true"`
-	HTTPServer `yaml:"http_server"`
+	Env                 string `yaml:"env" env-default:"development"`
+	StoragePath         string `yaml:"storage_path" env-required:"true"`
+	HTTPServer          `yaml:"http_server"`
 	TaskProcessorConfig `yaml:"task_processor"`
-	DatabaseConfig `yaml:"db"`
+	DatabaseConfig      `yaml:"db"`
 }
 
 type HTTPServer struct {
-	Host string `yaml:"host" env-default:"localhost"`
-	Port int `yaml:"port" env-default:"8080"`
-	Timeout time.Duration `yaml:"timeout" env-default:"5s"`
+	Host        string        `yaml:"host" env-default:"localhost"`
+	Port        int           `yaml:"port" env-default:"8080"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
 }
 
@@ -35,12 +35,12 @@ type TaskProcessorConfig struct {
 }
 
 type DatabaseConfig struct {
-	Host string `yaml:"host" env:"DB_HOST" env-required:"true"`
-	User string `yaml:"user" env:"DB_USER" env-required:"true"`
+	Host     string `yaml:"host" env:"DB_HOST" env-required:"true"`
+	User     string `yaml:"user" env:"DB_USER" env-required:"true"`
 	Password string `yaml:"password" env:"DB_PASSWORD" env-required:"true"`
-	DBName string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
-	Port string `yaml:"port" env:"DB_PORT" env-required:"true"`
-	SSLMode string `yaml:"sslmode" end:"DB_SSL_MODE" env-required:"true"`
+	DBName   string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
+	Port     string `yaml:"port" env:"DB_PORT" env-required:"true"`
+	SSLMode  string `yaml:"sslmode" end:"DB_SSL_MODE" env-required:"true"`
 }
 
 func (dbConfig DatabaseConfig) DSN() string {
@@ -68,7 +68,7 @@ func MustLoad() *Config {
 	if err := cleanenv.ReadConfig(configPath, &cfg); err != nil {
 		log.Fatalf("error reading config file: %s", err)
 	}
-	
+
 	if err := cleanenv.ReadEnv(&cfg); err != nil {
 		log.Fatalf("error reading env variables: %s", err)
 	}

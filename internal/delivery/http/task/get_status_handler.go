@@ -2,16 +2,17 @@ package task
 
 import (
 	"errors"
-	"gorm.io/gorm"
 	"log/slog"
 	"net/http"
+
+	"gorm.io/gorm"
 
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator"
 
 	resp "media-processing-platform/internal/delivery/http/shared"
-	"media-processing-platform/internal/repository"
 	"media-processing-platform/internal/domain"
+	"media-processing-platform/internal/repository"
 )
 
 // NewGetStatusHandler
@@ -50,7 +51,6 @@ func NewGetStatusHandler(log *slog.Logger, taskRepository repository.Task, valid
 		getStatusRespondOK(w, r, result)
 	}
 }
-
 
 func getStatusRespondOK(w http.ResponseWriter, r *http.Request, status domain.TaskStatus) {
 	render.JSON(w, r, GetStatusResponse{

@@ -18,7 +18,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-  
+
   postgres:
     image: postgres:18
     environment:
@@ -30,7 +30,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "user", "-d", "postgres"]
+      test: [ "CMD", "pg_isready", "-U", "user", "-d", "postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
