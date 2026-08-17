@@ -26,7 +26,7 @@ import (
 // @Router /result/{task_id} [get]
 func NewGetResultHandler(log *slog.Logger, taskRepository repository.Task, validate *validator.Validate) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id, ok := resp.BindPathUUID(w, r, log, "task_id")
+		id, ok := resp.BindPathUUID(w, r, "task_id")
 		if !ok {
 			return
 		}

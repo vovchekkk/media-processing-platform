@@ -3,7 +3,6 @@ package shared
 import (
 	"errors"
 	"io"
-	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -13,49 +12,43 @@ import (
 	"github.com/go-playground/validator"
 )
 
-func BindAndValidate(w http.ResponseWriter, r *http.Request, log *slog.Logger, target any, validate *validator.Validate) bool {
-	err := render.DecodeJSON(r.Body, target)
+var validate = validator.New()
 
-	if errors.Is(err, io.EOF) {
-		log.Error("empty request body", slog.Any("error", err))
-		render.JSON(w, r, Error("empty request body"))
-		return false
-	}
-
+func DecodeAndValidate[T any](w http.ResponseWriter, r *http.Request) (T, bool) {
+	var target T
+	
+	err := render.DecodeJSON(r.Body, &target)
 	if err != nil {
-		log.Error("failed to decode request body", slog.Any("error", err))
-		render.JSON(w, r, Error("failed to decode request body"))
-		return false
+		if errors.Is(err, io.EOF) {
+			SendError(w, r, http.StatusBadRequest, "empty request body")
+			return target, false
+		}
+		
+		SendError(w, r, http.StatusBadRequest, "failed to decode request body")
+		return target, false
 	}
 
 	if err := validate.Struct(target); err != nil {
-		log.Error("validation error", slog.Any("error", err.Error()))
-		render.JSON(w, r, Error("validation error"))
-		return false
+		SendError(w, r, http.StatusBadRequest, "validation error")
+		return target, false
 	}
 
-	return true
+	return target, true
 }
 
-func BindPathUUID(
-	w http.ResponseWriter,
-	r *http.Request,
-	log *slog.Logger,
-	param string,
-) (uuid.UUID, bool) {
+func BindPathUUID(w http.ResponseWriter, r *http.Request, param string) (uuid.UUID, bool) {
 	value := chi.URLParam(r, param)
 
 	id, err := uuid.Parse(value)
 	if err != nil {
-		log.Error("invalid UUID path parameter",
-			"parameter", param,
-			"value", value,
-			"error", err,
-		)
-
-		render.JSON(w, r, Error("invalid task id"))
+		SendError(w, r, http.StatusBadRequest, "invalid UUID path parameter")
 		return uuid.Nil, false
 	}
 
 	return id, true
+}
+
+func SendError(w http.ResponseWriter, r *http.Request, statusCode int, msg string) {
+	render.Status(r, statusCode)
+	render.JSON(w, r, Error(msg))
 }

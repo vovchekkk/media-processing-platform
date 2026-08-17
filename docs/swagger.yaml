@@ -31,9 +31,84 @@ definitions:
     x-enum-varnames:
     - StatusInProgress
     - StatusReady
+  media-processing-platform_internal_domain.UserDTO:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
 info:
   contact: {}
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные и возвращает UUID токен сессии
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media-processing-platform_internal_domain.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает token в JSON
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный формат запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверный логин или пароль
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Создает аккаунт пользователя с переданными DTO данными
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media-processing-platform_internal_domain.UserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно зарегистрирован
+        "400":
+          description: Неверный формат запроса или валидация не пройдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
   /result/{task_id}:
     get:
       description: Returns the processing result of a task by its ID

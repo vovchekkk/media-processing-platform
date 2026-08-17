@@ -10,8 +10,8 @@ import (
 	_ "media-processing-platform/docs"
 	"media-processing-platform/internal/config"
 	router "media-processing-platform/internal/delivery/http"
-	"media-processing-platform/internal/infrastructure/database"
-	"media-processing-platform/internal/repository"
+	"media-processing-platform/internal/infrastructure/postgres"
+	"media-processing-platform/internal/repository/postgres"
 	"media-processing-platform/internal/service"
 )
 
@@ -32,13 +32,17 @@ func main() {
 
 	db := database.InitDB(cfg.DatabaseConfig, logger)
 
-	taskRepository := repository.NewGormTaskRepository(db)
+	userRepository := postgres.NewGormUserRepository(db)
+	taskRepository := postgres.NewGormTaskRepository(db)
+	sessionRepository := postgres.NewGormSessionRepository(db)
+
+	authService := service.NewAuthService(userRepository, sessionRepository)
 
 	validate := validator.New()
 
 	taskProcessor := service.NewTaskProcessor(cfg.TaskProcessorConfig, taskRepository, logger)
 
-	appRouter := router.InitRouter(logger, taskRepository, validate, taskProcessor)
+	appRouter := router.InitRouter(logger, authService, taskRepository, validate, taskProcessor)
 
 	logger.Info("starting server", slog.String("address", cfg.Address()))
 

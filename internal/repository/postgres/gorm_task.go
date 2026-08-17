@@ -1,21 +1,22 @@
-package repository
+package postgres
 
 import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
 	"media-processing-platform/internal/domain"
+	"media-processing-platform/internal/repository"
 )
 
 type gormTask struct {
 	db *gorm.DB
 }
 
-func NewGormTaskRepository(db *gorm.DB) Task {
+func NewGormTaskRepository(db *gorm.DB) repository.Task {
 	return &gormTask{db: db}
 }
 
-var _ Task = (*gormTask)(nil)
+var _ repository.Task = (*gormTask)(nil)
 
 func (r *gormTask) CreateTask(task *domain.Task) error {
 	return r.db.Create(task).Error
