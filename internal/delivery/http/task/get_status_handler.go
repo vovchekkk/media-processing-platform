@@ -15,16 +15,18 @@ import (
 	"media-processing-platform/internal/repository"
 )
 
-// NewGetStatusHandler
-// @Summary Get task status
-// @Description Returns the current processing status of a task by its ID
+// NewGetResultHandler
+// @Summary Get task result
+// @Description Returns the processing result of a task by its ID
 // @Tags tasks
 // @Produce json
 // @Param task_id path string true "Task UUID" format(uuid)
-// @Success 200 {object} GetStatusResponse
+// @Success 200 {object} GetResultResponse
 // @Failure 400 {object} resp.Response
+// @Failure 401 {object} resp.Response
 // @Failure 500 {object} resp.Response
-// @Router /status/{task_id} [get]
+// @Security BearerAuth
+// @Router /result/{task_id} [get]
 func NewGetStatusHandler(log *slog.Logger, taskRepository repository.Task, validate *validator.Validate) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, ok := resp.BindPathUUID(w, r, "task_id")

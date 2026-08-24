@@ -38,6 +38,16 @@ func InitDB(dbConfig config.DatabaseConfig, log *slog.Logger) *gorm.DB {
 
 	log.Info("running database auto-migrations...")
 
+	if err := db.AutoMigrate(&domain.User{}); err != nil {
+		log.Error("failed to run database auto-migrations", "error", err)
+		os.Exit(1)
+	}
+
+	if err := db.AutoMigrate(&domain.Session{}); err != nil {
+		log.Error("failed to run database auto-migrations", "error", err)
+		os.Exit(1)
+	}
+
 	if err := db.AutoMigrate(&domain.Task{}); err != nil {
 		log.Error("failed to run database auto-migrations", "error", err)
 		os.Exit(1)

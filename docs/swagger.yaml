@@ -37,9 +37,15 @@ definitions:
         type: string
       username:
         type: string
+    required:
+    - password
+    - username
     type: object
 info:
   contact: {}
+  description: API Server for Media Processing Platform
+  title: Media Processing Platform API
+  version: "1.0"
 paths:
   /login:
     post:
@@ -130,10 +136,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      security:
+      - BearerAuth: []
       summary: Get task result
       tags:
       - tasks
@@ -158,10 +170,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      security:
+      - BearerAuth: []
       summary: Get task status
       tags:
       - tasks
@@ -188,11 +206,23 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      security:
+      - BearerAuth: []
       summary: Create task
       tags:
       - tasks
+securityDefinitions:
+  BearerAuth:
+    description: 'Введите токен в формате: Bearer <UUID_токен_сессии>'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

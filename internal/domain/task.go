@@ -11,6 +11,6 @@ const (
 
 type Task struct {
 	ID     uuid.UUID `gorm:"type:uuid;primaryKey;"`
-	Status string    `gorm:"type:varchar(20);default:'in_progress'"`
+	Status string    `gorm:"type:varchar(255);default:'in_progress'"`
 	Result string    `gorm:"type:text"`
 }

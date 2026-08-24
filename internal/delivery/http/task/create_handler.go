@@ -23,7 +23,9 @@ import (
 // @Param request body CreateRequest true "Task creation request"
 // @Success 201 {object} CreateResponse
 // @Failure 400 {object} resp.Response
+// @Failure 401 {object} resp.Response
 // @Failure 500 {object} resp.Response
+// @Security BearerAuth
 // @Router /task [post]
 func NewCreateHandler(log *slog.Logger, taskRepository repository.Task, validate *validator.Validate, taskProcessor *service.TaskProcessor) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -121,6 +121,11 @@ const docTemplate = `{
         },
         "/result/{task_id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns the processing result of a task by its ID",
                 "produces": [
                     "application/json"
@@ -152,6 +157,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -163,6 +174,11 @@ const docTemplate = `{
         },
         "/status/{task_id}": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns the current processing status of a task by its ID",
                 "produces": [
                     "application/json"
@@ -194,6 +210,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -205,6 +227,11 @@ const docTemplate = `{
         },
         "/task": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Creates a new media processing task",
                 "consumes": [
                     "application/json"
@@ -236,6 +263,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/media-processing-platform_internal_delivery_http_shared.Response"
                         }
@@ -302,6 +335,10 @@ const docTemplate = `{
         },
         "media-processing-platform_internal_domain.UserDTO": {
             "type": "object",
+            "required": [
+                "password",
+                "username"
+            ],
             "properties": {
                 "password": {
                     "type": "string"
@@ -311,17 +348,25 @@ const docTemplate = `{
                 }
             }
         }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Введите токен в формате: Bearer \u003cUUID_токен_сессии\u003e",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
     }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Media Processing Platform API",
+	Description:      "API Server for Media Processing Platform",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

@@ -21,6 +21,14 @@ const (
 	envProd  = "production"
 )
 
+// @title           Media Processing Platform API
+// @version         1.0
+// @description     API Server for Media Processing Platform
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Введите токен в формате: Bearer <UUID_токен_сессии>
 func main() {
 	cfg := config.MustLoad()
 

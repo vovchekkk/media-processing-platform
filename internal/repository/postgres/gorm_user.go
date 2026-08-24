@@ -20,9 +20,16 @@ func NewGormUserRepository(db *gorm.DB) repository.User {
 var _ repository.User = (*gormUser)(nil)
 
 func (r *gormUser) CreateUser(ctx context.Context, user *domain.User) error {
-	panic("unimplemented")
+	return r.db.Create(user).Error
 }
 
 func (r *gormUser) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
-	panic("unimplemented")
+	var user domain.User
+
+	err := r.db.First(&user, "username = ?", username).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }

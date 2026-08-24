@@ -24,14 +24,10 @@ func AuthMiddleware(authService *service.AuthService) func(http.Handler) http.Ha
 				return
 			}
 
-			parts := strings.Split(authHeader, " ")
-			if len(parts) != 2 || parts[0] != "Bearer" {
-				shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
-				return
-			}
+			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+			tokenStr = strings.TrimSpace(tokenStr)
 
-			token := parts[1]
-			parsedToken, err := uuid.Parse(token)
+			parsedToken, err := uuid.Parse(tokenStr)
 			if err != nil {
 				shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
 				return
