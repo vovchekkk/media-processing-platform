@@ -1,0 +1,123 @@
+definitions:
+  internal_delivery_http_task.CreateRequest:
+    type: object
+  internal_delivery_http_task.CreateResponse:
+    properties:
+      task_id:
+        type: string
+    type: object
+  internal_delivery_http_task.GetResultResponse:
+    properties:
+      result:
+        type: string
+    type: object
+  internal_delivery_http_task.GetStatusResponse:
+    properties:
+      status:
+        $ref: '#/definitions/media-processing-platform_internal_domain.TaskStatus'
+    type: object
+  media-processing-platform_internal_delivery_http_shared.Response:
+    properties:
+      error:
+        type: string
+      response_status:
+        type: string
+    type: object
+  media-processing-platform_internal_domain.TaskStatus:
+    enum:
+    - in_progress
+    - ready
+    type: string
+    x-enum-varnames:
+    - StatusInProgress
+    - StatusReady
+info:
+  contact: {}
+paths:
+  /result/{task_id}:
+    get:
+      description: Returns the processing result of a task by its ID
+      parameters:
+      - description: Task UUID
+        format: uuid
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_delivery_http_task.GetResultResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      summary: Get task result
+      tags:
+      - tasks
+  /status/{task_id}:
+    get:
+      description: Returns the current processing status of a task by its ID
+      parameters:
+      - description: Task UUID
+        format: uuid
+        in: path
+        name: task_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_delivery_http_task.GetStatusResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      summary: Get task status
+      tags:
+      - tasks
+  /task:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new media processing task
+      parameters:
+      - description: Task creation request
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/internal_delivery_http_task.CreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_delivery_http_task.CreateResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+      summary: Create task
+      tags:
+      - tasks
+swagger: "2.0"
