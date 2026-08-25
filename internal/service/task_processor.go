@@ -70,7 +70,7 @@ func (taskProccessor *TaskProcessor) finishTaskProcessing(id uuid.UUID) {
 	taskProccessor.log.Info("task processing completed", "task_id", id)
 }
 
-func (taskProccessor *TaskProcessor) Process(id uuid.UUID) {
+func (taskProccessor *TaskProcessor) Process(id uuid.UUID) error {
 	go func() {
 		taskProccessor.startTaskProcessing(id)
 
@@ -78,4 +78,6 @@ func (taskProccessor *TaskProcessor) Process(id uuid.UUID) {
 
 		taskProccessor.finishTaskProcessing(id)
 	}()
+
+	return nil
 }

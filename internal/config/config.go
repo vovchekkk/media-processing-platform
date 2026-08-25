@@ -44,6 +44,10 @@ type DatabaseConfig struct {
 }
 
 func (dbConfig DatabaseConfig) DSN() string {
+	if host := os.Getenv("DB_HOST"); host != "" {
+		dbConfig.Host = host
+	}
+
 	return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		dbConfig.Host,
 		dbConfig.User,
