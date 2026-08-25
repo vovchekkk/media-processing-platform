@@ -11,7 +11,7 @@ import (
 )
 
 type AuthHandler struct {
-	log *slog.Logger
+	log *slog.Logger	
 	authService *service.AuthService
 }
 

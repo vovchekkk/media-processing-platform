@@ -8,6 +8,7 @@ docker-run:
 	docker run --rm \
 		-p 8000:8000 \
 		-e CONFIG_PATH=/app/config/config.yaml \
+		-e DB_HOST=host.docker.internal \
 		-v "$(PWD)/config/config.yaml:/app/config/config.yaml:ro" \
 		media-processing-platform
 local-postgresql:

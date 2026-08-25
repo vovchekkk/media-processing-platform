@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-playground/validator"
-
 	_ "media-processing-platform/docs"
 	"media-processing-platform/internal/config"
 	router "media-processing-platform/internal/delivery/http"
@@ -44,13 +42,12 @@ func main() {
 	taskRepository := postgres.NewGormTaskRepository(db)
 	sessionRepository := postgres.NewGormSessionRepository(db)
 
-	authService := service.NewAuthService(userRepository, sessionRepository)
-
-	validate := validator.New()
-
 	taskProcessor := service.NewTaskProcessor(cfg.TaskProcessorConfig, taskRepository, logger)
 
-	appRouter := router.InitRouter(logger, authService, taskRepository, validate, taskProcessor)
+	authService := service.NewAuthService(userRepository, sessionRepository)
+	taskService := service.NewTaskService(taskRepository, taskProcessor)
+
+	appRouter := router.InitRouter(logger, authService, taskService)
 
 	logger.Info("starting server", slog.String("address", cfg.Address()))
 

@@ -8,15 +8,13 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	slogchi "github.com/samber/slog-chi"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"github.com/go-playground/validator"
 
 	"media-processing-platform/internal/delivery/http/task"
-	"media-processing-platform/internal/repository"
 	"media-processing-platform/internal/service"
 	"media-processing-platform/internal/delivery/http/auth"
 )
 
-func InitRouter(log *slog.Logger, authService *service.AuthService, taskRepo repository.Task, validate *validator.Validate, taskProcessor *service.TaskProcessor) http.Handler {
+func InitRouter(log *slog.Logger, authService *service.AuthService, taskService *service.TaskService) http.Handler {
 	router := chi.NewRouter()
 
 	router.Use(middleware.RequestID)
@@ -33,7 +31,7 @@ func InitRouter(log *slog.Logger, authService *service.AuthService, taskRepo rep
 	router.Group(func(r chi.Router) {
 		r.Use(auth.AuthMiddleware(authService))
 
-		task.RegisterRoutes(r, log, taskRepo, validate, taskProcessor)
+		task.RegisterRoutes(r, taskService)
 	})
 
 	return router
