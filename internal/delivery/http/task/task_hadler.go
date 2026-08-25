@@ -16,8 +16,11 @@ type TaskHandler struct {
 	taskService *service.TaskService
 }
 
-func NewTaskHandler(taskService *service.TaskService) *TaskHandler {
-	return &TaskHandler{taskService: taskService}
+func NewTaskHandler(log *slog.Logger, taskService *service.TaskService) *TaskHandler {
+	return &TaskHandler{
+		log:         log,
+		taskService: taskService,
+	}
 }
 
 // Create godoc
@@ -114,6 +117,8 @@ func (taskHandler *TaskHandler) GetStatus(w http.ResponseWriter, r *http.Request
 			taskHandler.log.Error("failed to get task status", "error", err)
 			shared.SendError(w, r, http.StatusInternalServerError, "failed to get task status")
 		}
+
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")

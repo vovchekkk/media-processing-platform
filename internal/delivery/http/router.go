@@ -26,12 +26,12 @@ func InitRouter(log *slog.Logger, authService *service.AuthService, taskService 
 
 	router.Get("/swagger/*", httpSwagger.Handler())
 
-	auth.RegisterRoutes(router, authService)
+	auth.RegisterRoutes(router, log, authService)
 
 	router.Group(func(r chi.Router) {
 		r.Use(auth.AuthMiddleware(authService))
 
-		task.RegisterRoutes(r, taskService)
+		task.RegisterRoutes(r, log, taskService)
 	})
 
 	return router

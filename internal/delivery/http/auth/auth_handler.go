@@ -15,8 +15,11 @@ type AuthHandler struct {
 	authService *service.AuthService
 }
 
-func NewAuthHandler(as *service.AuthService) *AuthHandler {
-	return &AuthHandler{authService: as}
+func NewAuthHandler(log *slog.Logger, authService *service.AuthService) *AuthHandler {
+	return &AuthHandler{
+		log: log,
+		authService: authService,
+	}
 }
 
 // Register godoc
