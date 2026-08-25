@@ -26,14 +26,15 @@ func NewTaskHandler(log *slog.Logger, taskService *service.TaskService) *TaskHan
 
 // Create godoc
 // @Summary Create task
-// @Description Creates a new media processing task
+// @Description Creates a new image processing task. The image must be provided as a Base64-encoded string.
 // @Tags tasks
 // @Accept json
 // @Produce json
-// @Param request body CreateRequest true "Task creation request"
+// @Param request body dto.Task true "Task creation request"
 // @Success 201 {object} CreateResponse
-// @Failure 401 {object} resp.Response
-// @Failure 500 {object} resp.Response
+// @Failure 400 {object} map[string]string "Invalid request body"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
 // @Router /task [post]
 func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
@@ -59,14 +60,15 @@ func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // GetResult godoc
 // @Summary Get task result
-// @Description Returns the processing result of a task by its ID
+// @Description Returns the result of an image processing task by its ID
 // @Tags tasks
 // @Produce json
 // @Param task_id path string true "Task UUID" format(uuid)
 // @Success 200 {object} GetResultResponse
-// @Failure 400 {object} resp.Response
-// @Failure 401 {object} resp.Response
-// @Failure 500 {object} resp.Response
+// @Failure 400 {object} map[string]string "Invalid task ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Task not found"
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
 // @Router /result/{task_id} [get]
 func (taskHandler *TaskHandler) GetResult(w http.ResponseWriter, r *http.Request) {
@@ -102,10 +104,11 @@ func (taskHandler *TaskHandler) GetResult(w http.ResponseWriter, r *http.Request
 // @Tags tasks
 // @Produce json
 // @Param task_id path string true "Task UUID" format(uuid)
-// @Success 200 {object} GetResultResponse
-// @Failure 400 {object} resp.Response
-// @Failure 401 {object} resp.Response
-// @Failure 500 {object} resp.Response
+// @Success 200 {object} GetStatusResponse
+// @Failure 400 {object} map[string]string "Invalid task ID"
+// @Failure 401 {object} map[string]string "Unauthorized"
+// @Failure 404 {object} map[string]string "Task not found"
+// @Failure 500 {object} map[string]string "Internal server error"
 // @Security BearerAuth
 // @Router /status/{task_id} [get]
 func (taskHandler *TaskHandler) GetStatus(w http.ResponseWriter, r *http.Request) {

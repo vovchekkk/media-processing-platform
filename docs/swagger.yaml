@@ -1,6 +1,4 @@
 definitions:
-  internal_delivery_http_task.CreateRequest:
-    type: object
   internal_delivery_http_task.CreateResponse:
     properties:
       task_id:
@@ -16,13 +14,6 @@ definitions:
       status:
         $ref: '#/definitions/media-processing-platform_internal_domain.TaskStatus'
     type: object
-  media-processing-platform_internal_delivery_http_shared.Response:
-    properties:
-      error:
-        type: string
-      response_status:
-        type: string
-    type: object
   media-processing-platform_internal_domain.TaskStatus:
     enum:
     - in_progress
@@ -31,7 +22,19 @@ definitions:
     x-enum-varnames:
     - StatusInProgress
     - StatusReady
-  media-processing-platform_internal_domain.UserDTO:
+  media-processing-platform_internal_dto.ImageFilter:
+    properties:
+      name:
+        type: string
+    type: object
+  media-processing-platform_internal_dto.Task:
+    properties:
+      filter:
+        $ref: '#/definitions/media-processing-platform_internal_dto.ImageFilter'
+      image:
+        type: string
+    type: object
+  media-processing-platform_internal_dto.User:
     properties:
       password:
         type: string
@@ -58,7 +61,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/media-processing-platform_internal_domain.UserDTO'
+          $ref: '#/definitions/media-processing-platform_internal_dto.User'
       produces:
       - application/json
       responses:
@@ -94,7 +97,7 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/media-processing-platform_internal_domain.UserDTO'
+          $ref: '#/definitions/media-processing-platform_internal_dto.User'
       produces:
       - application/json
       responses:
@@ -117,7 +120,7 @@ paths:
       - auth
   /result/{task_id}:
     get:
-      description: Returns the processing result of a task by its ID
+      description: Returns the result of an image processing task by its ID
       parameters:
       - description: Task UUID
         format: uuid
@@ -133,17 +136,29 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.GetResultResponse'
         "400":
-          description: Bad Request
+          description: Invalid task ID
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
-        "500":
-          description: Internal Server Error
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Task not found
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Get task result
@@ -167,17 +182,29 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.GetStatusResponse'
         "400":
-          description: Bad Request
+          description: Invalid task ID
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
-        "500":
-          description: Internal Server Error
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Task not found
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Get task status
@@ -187,14 +214,15 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new media processing task
+      description: Creates a new image processing task. The image must be provided
+        as a Base64-encoded string.
       parameters:
       - description: Task creation request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_delivery_http_task.CreateRequest'
+          $ref: '#/definitions/media-processing-platform_internal_dto.Task'
       produces:
       - application/json
       responses:
@@ -203,17 +231,23 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.CreateResponse'
         "400":
-          description: Bad Request
+          description: Invalid request body
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
       security:
       - BearerAuth: []
       summary: Create task
