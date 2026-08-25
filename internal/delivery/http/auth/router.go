@@ -9,6 +9,8 @@ import (
 )
 
 func RegisterRoutes(r chi.Router, log *slog.Logger, authService *service.AuthService) {
-	r.Post("/register", NewAuthHandler(log, authService).Register)
-	r.Post("/login", NewAuthHandler(log, authService).Login)
+	handler := NewAuthHandler(log, authService)
+	
+	r.Post("/register", handler.Register)
+	r.Post("/login", handler.Login)
 }
