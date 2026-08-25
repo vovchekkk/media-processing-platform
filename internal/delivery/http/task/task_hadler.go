@@ -8,6 +8,7 @@ import (
 
 	"media-processing-platform/internal/delivery/http/shared"
 	"media-processing-platform/internal/domain"
+	"media-processing-platform/internal/dto"
 	"media-processing-platform/internal/service"
 )
 
@@ -36,7 +37,12 @@ func NewTaskHandler(log *slog.Logger, taskService *service.TaskService) *TaskHan
 // @Security BearerAuth
 // @Router /task [post]
 func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
-	id, err := taskHandler.taskService.Create(r.Context())
+	req, ok := shared.DecodeAndValidate[dto.Task](w, r)
+	if !ok {
+		return
+	}
+
+	id, err := taskHandler.taskService.Create(r.Context(), &req)
 	if err != nil {
 		taskHandler.log.Error("failed to create task", "error", err)
 		shared.SendError(w, r, http.StatusInternalServerError, "failed to create task")
@@ -46,7 +52,7 @@ func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 
-	if err := json.NewEncoder(w).Encode(map[string]string{"id": id.String()}); err != nil {
+	if err := json.NewEncoder(w).Encode(map[string]string{"task_id": id.String()}); err != nil {
 		taskHandler.log.Error("failed to encode create response", "error", err)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"media-processing-platform/internal/domain"
+	"media-processing-platform/internal/dto"
 	"media-processing-platform/internal/repository"
 )
 
@@ -23,19 +24,22 @@ func NewTaskService(taskRepo repository.Task, taskProcessor *TaskProcessor) *Tas
 	}
 }
 
-func (taskService *TaskService) Create(ctx context.Context) (uuid.UUID, error) {
+func (taskService *TaskService) Create(ctx context.Context, taskDTO *dto.Task) (uuid.UUID, error) {
 	id, err := uuid.NewRandom()
 	if err != nil {
-		return uuid.Nil, domain.ErrFailedToGenerateUUID
+		return uuid.Nil, err
 	}
 
-	task := &domain.Task{ID: id}
+	task := &domain.Task{
+		ID: id,
+
+	}
 
 	if err := taskService.taskRepository.CreateTask(ctx, task); err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := taskService.taskProcessor.Process(ctx, id); err != nil {
+	if err := taskService.taskProcessor.Process(id); err != nil {
 		return uuid.Nil, err
 	}
 

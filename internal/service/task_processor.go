@@ -74,8 +74,10 @@ func (taskProccessor *TaskProcessor) finishTaskProcessing(ctx context.Context, i
 	taskProccessor.log.Info("task processing completed", "task_id", id)
 }
 
-func (taskProccessor *TaskProcessor) Process(ctx context.Context, id uuid.UUID) error {
+func (taskProccessor *TaskProcessor) Process(id uuid.UUID) error {
 	go func() {
+		ctx := context.Background()
+
 		taskProccessor.startTaskProcessing(ctx, id)
 
 		taskProccessor.doVeryExpensiveTask(ctx, id)

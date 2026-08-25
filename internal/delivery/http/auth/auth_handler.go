@@ -6,8 +6,8 @@ import (
 	"net/http"
 
 	"media-processing-platform/internal/delivery/http/shared"
-	"media-processing-platform/internal/domain"
 	"media-processing-platform/internal/service"
+	"media-processing-platform/internal/dto"
 )
 
 type AuthHandler struct {
@@ -28,13 +28,13 @@ func NewAuthHandler(log *slog.Logger, authService *service.AuthService) *AuthHan
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        request  body      domain.UserDTO  true  "Данные для регистрации"
+// @Param        request  body      dto.User  true  "Данные для регистрации"
 // @Success      200      "Пользователь успешно зарегистрирован"
 // @Failure      400      {object}  map[string]string  "Неверный формат запроса или валидация не пройдена"
 // @Failure      500      {object}  map[string]string  "Внутренняя ошибка сервера"
 // @Router       /register [post]
 func (authHandler *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	req, ok := shared.DecodeAndValidate[domain.UserDTO](w, r)
+	req, ok := shared.DecodeAndValidate[dto.User](w, r)
 	if !ok {
 		return
 	}
@@ -45,7 +45,7 @@ func (authHandler *AuthHandler) Register(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	w.WriteHeader(http.StatusCreated)
 }
 
 // Login godoc
@@ -54,13 +54,13 @@ func (authHandler *AuthHandler) Register(w http.ResponseWriter, r *http.Request)
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        request  body      domain.UserDTO  true  "Данные для входа"
+// @Param        request  body      dto.User  true  "Данные для входа"
 // @Success      200      {object}  map[string]string  "Возвращает token в JSON"
 // @Failure      400      {object}  map[string]string  "Неверный формат запроса"
 // @Failure      401      {object}  map[string]string  "Неверный логин или пароль"
 // @Router       /login [post]
 func (authHandler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	req, ok := shared.DecodeAndValidate[domain.UserDTO](w, r)
+	req, ok := shared.DecodeAndValidate[dto.User](w, r)
 	if !ok {
 		return
 	}

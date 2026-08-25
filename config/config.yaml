@@ -15,4 +15,4 @@ db:
   port: "5433"
   sslmode: "disable"
 task_processor:
-  processing_duration: 30s
+  processing_duration: 10s

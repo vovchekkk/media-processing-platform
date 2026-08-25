@@ -13,7 +13,12 @@ def user_data():
     return {'username': username, 'password': password}
 
 @pytest.fixture(scope='module')
-def auth_token(user_data):
+def auth_token():
+    user_data = {
+        'username': f'user_{uuid.uuid4()}',
+        'password': 'password228'
+    }
+
     register_url = f"{BASE_URL}/register"
     login_url = f"{BASE_URL}/login"
 
@@ -53,6 +58,8 @@ def get_image_processor_payload():
 def test_create_task(auth_token):
     task_url = f"{BASE_URL}/task"
     headers = {'Authorization': f'Bearer {auth_token}'}
+
+    payload = get_image_processor_payload()
     
     response = requests.post(task_url, headers=headers, json=payload) 
 

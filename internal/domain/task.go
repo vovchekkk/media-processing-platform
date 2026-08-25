@@ -10,7 +10,13 @@ const (
 )
 
 type Task struct {
-	ID     uuid.UUID `gorm:"type:uuid;primaryKey;"`
-	Status string    `gorm:"type:varchar(255);default:'in_progress'"`
-	Result string    `gorm:"type:text"`
+	ID     uuid.UUID   `gorm:"type:uuid;primaryKey;"`
+	Filter ImageFilter `gorm:"serializer:json"`
+	Image  string      `gorm:"type:text"`
+	Status string      `gorm:"type:varchar(255);default:'in_progress'"`
+	Result string      `gorm:"type:text"`
+}
+
+type ImageFilter struct {
+	Name string `json:"name"`
 }

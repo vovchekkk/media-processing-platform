@@ -3,11 +3,12 @@ package service
 import (
 	"context"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
-	"media-processing-platform/internal/repository"
 	"media-processing-platform/internal/domain"
+	"media-processing-platform/internal/repository"
+	"media-processing-platform/internal/dto"
 )
 
 type AuthService struct {
@@ -22,13 +23,19 @@ func NewAuthService(userRepo repository.User, sessionRepo repository.Session) *A
 	}
 }
 
-func (authService *AuthService) Register(ctx context.Context, userDTO *domain.UserDTO) error {
+func (authService *AuthService) Register(ctx context.Context, userDTO *dto.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userDTO.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
 
+	id, err := uuid.NewRandom()
+	if err != nil {
+		return err
+	}
+
 	user := &domain.User{
+		ID:       id,
 		Username: userDTO.Username,
 		Password: string(hashedPassword),
 	}
@@ -36,7 +43,7 @@ func (authService *AuthService) Register(ctx context.Context, userDTO *domain.Us
 	return authService.userRepository.CreateUser(ctx, user)
 }
 
-func (authService *AuthService) Login(ctx context.Context, userDTO *domain.UserDTO) (uuid.UUID, error) {
+func (authService *AuthService) Login(ctx context.Context, userDTO *dto.User) (uuid.UUID, error) {
 	user, err := authService.userRepository.GetByUsername(ctx, userDTO.Username)
 	if err != nil || user == nil {
 		return uuid.Nil, domain.ErrInvalidCredentials
