@@ -20,13 +20,13 @@ func NewGormUserRepository(db *gorm.DB) repository.User {
 var _ repository.User = (*gormUser)(nil)
 
 func (r *gormUser) CreateUser(ctx context.Context, user *domain.User) error {
-	return r.db.Create(user).Error
+	return r.db.WithContext(ctx).Create(user).Error
 }
 
 func (r *gormUser) GetByUsername(ctx context.Context, username string) (*domain.User, error) {
 	var user domain.User
 
-	err := r.db.First(&user, "username = ?", username).Error
+	err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error
 	if err != nil {
 		return nil, err
 	}

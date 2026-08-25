@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"log/slog"
 	"time"
 
@@ -25,8 +26,9 @@ func NewTaskProcessor(cfg config.TaskProcessorConfig, repository repository.Task
 	}
 }
 
-func (taskProccessor *TaskProcessor) startTaskProcessing(id uuid.UUID) {
+func (taskProccessor *TaskProcessor) startTaskProcessing(ctx context.Context, id uuid.UUID) {
 	if err := taskProccessor.repository.UpdateTaskStatus(
+		ctx,
 		id,
 		domain.StatusInProgress,
 	); err != nil {
@@ -40,10 +42,11 @@ func (taskProccessor *TaskProcessor) startTaskProcessing(id uuid.UUID) {
 	taskProccessor.log.Info("task processing started", "task_id", id)
 }
 
-func (taskProccessor *TaskProcessor) doVeryExpensiveTask(id uuid.UUID) {
+func (taskProccessor *TaskProcessor) doVeryExpensiveTask(ctx context.Context, id uuid.UUID) {
 	time.Sleep(taskProccessor.processingDuration)
 
 	if err := taskProccessor.repository.SetTaskResult(
+		ctx,
 		id,
 		"Good job! Task completed successfully.",
 	); err != nil {
@@ -55,8 +58,9 @@ func (taskProccessor *TaskProcessor) doVeryExpensiveTask(id uuid.UUID) {
 	}
 }
 
-func (taskProccessor *TaskProcessor) finishTaskProcessing(id uuid.UUID) {
+func (taskProccessor *TaskProcessor) finishTaskProcessing(ctx context.Context, id uuid.UUID) {
 	if err := taskProccessor.repository.UpdateTaskStatus(
+		ctx,
 		id,
 		domain.StatusReady,
 	); err != nil {
@@ -70,13 +74,13 @@ func (taskProccessor *TaskProcessor) finishTaskProcessing(id uuid.UUID) {
 	taskProccessor.log.Info("task processing completed", "task_id", id)
 }
 
-func (taskProccessor *TaskProcessor) Process(id uuid.UUID) error {
+func (taskProccessor *TaskProcessor) Process(ctx context.Context, id uuid.UUID) error {
 	go func() {
-		taskProccessor.startTaskProcessing(id)
+		taskProccessor.startTaskProcessing(ctx, id)
 
-		taskProccessor.doVeryExpensiveTask(id)
+		taskProccessor.doVeryExpensiveTask(ctx, id)
 
-		taskProccessor.finishTaskProcessing(id)
+		taskProccessor.finishTaskProcessing(ctx, id)
 	}()
 
 	return nil

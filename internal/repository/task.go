@@ -1,19 +1,21 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/google/uuid"
 
 	"media-processing-platform/internal/domain"
 )
 
 type Task interface {
-	CreateTask(task *domain.Task) error
+	CreateTask(ctx context.Context, task *domain.Task) error
 
-	GetTaskStatusByID(id uuid.UUID) (domain.TaskStatus, error)
+	GetTaskStatusByID(ctx context.Context, id uuid.UUID) (domain.TaskStatus, error)
 
-	GetTaskResultByID(id uuid.UUID) (string, error)
+	GetTaskResultByID(ctx context.Context, id uuid.UUID) (string, error)
 
-	UpdateTaskStatus(id uuid.UUID, status domain.TaskStatus) error
+	UpdateTaskStatus(ctx context.Context, id uuid.UUID, status domain.TaskStatus) error
 
-	SetTaskResult(id uuid.UUID, result string) error
+	SetTaskResult(ctx context.Context, id uuid.UUID, result string) error
 }

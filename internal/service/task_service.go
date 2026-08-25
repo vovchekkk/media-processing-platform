@@ -31,11 +31,11 @@ func (taskService *TaskService) Create(ctx context.Context) (uuid.UUID, error) {
 
 	task := &domain.Task{ID: id}
 
-	if err := taskService.taskRepository.CreateTask(task); err != nil {
+	if err := taskService.taskRepository.CreateTask(ctx, task); err != nil {
 		return uuid.Nil, err
 	}
 
-	if err := taskService.taskProcessor.Process(id); err != nil {
+	if err := taskService.taskProcessor.Process(ctx, id); err != nil {
 		return uuid.Nil, err
 	}
 
@@ -43,7 +43,7 @@ func (taskService *TaskService) Create(ctx context.Context) (uuid.UUID, error) {
 }
 
 func (taskService *TaskService) GetResult(ctx context.Context, id uuid.UUID) (string, error) {
-	result, err := taskService.taskRepository.GetTaskResultByID(id)
+	result, err := taskService.taskRepository.GetTaskResultByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", domain.ErrTaskNotFound
@@ -56,7 +56,7 @@ func (taskService *TaskService) GetResult(ctx context.Context, id uuid.UUID) (st
 }
 
 func (taskService *TaskService) GetStatus(ctx context.Context, id uuid.UUID) (domain.TaskStatus, error) {
-	status, err := taskService.taskRepository.GetTaskStatusByID(id)
+	status, err := taskService.taskRepository.GetTaskStatusByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return "", domain.ErrTaskNotFound
