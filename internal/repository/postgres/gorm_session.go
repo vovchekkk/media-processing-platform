@@ -26,7 +26,7 @@ func (r *gormSession) CreateSession(ctx context.Context, session *domain.Session
 
 func (r *gormSession) GetSessionByID(ctx context.Context, sessionID uuid.UUID) (*domain.Session, error) {
 	var session domain.Session
-	
+
 	err := r.db.WithContext(ctx).First(&session, "id = ?", sessionID).Error
 	if err != nil {
 		return nil, err

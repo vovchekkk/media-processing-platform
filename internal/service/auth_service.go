@@ -7,8 +7,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"media-processing-platform/internal/domain"
-	"media-processing-platform/internal/repository"
 	"media-processing-platform/internal/dto"
+	"media-processing-platform/internal/repository"
 )
 
 type AuthService struct {
@@ -45,7 +45,12 @@ func (authService *AuthService) Register(ctx context.Context, userDTO *dto.User)
 
 func (authService *AuthService) Login(ctx context.Context, userDTO *dto.User) (uuid.UUID, error) {
 	user, err := authService.userRepository.GetByUsername(ctx, userDTO.Username)
-	if err != nil || user == nil {
+
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if user == nil {
 		return uuid.Nil, domain.ErrInvalidCredentials
 	}
 
@@ -68,6 +73,10 @@ func (authService *AuthService) Login(ctx context.Context, userDTO *dto.User) (u
 	}
 
 	return sessionID, nil
+}
+
+func (authService *AuthService) Logout(ctx context.Context, sessionID uuid.UUID) error {
+	return authService.sessionRepository.DeleteSession(ctx, sessionID)
 }
 
 func (authService *AuthService) ValidateToken(ctx context.Context, token uuid.UUID) (*domain.Session, error) {

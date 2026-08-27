@@ -43,7 +43,13 @@ func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := taskHandler.taskService.Create(r.Context(), &req)
+	userID, ok := shared.GetUserID(r.Context())
+	if !ok {
+		shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	id, err := taskHandler.taskService.Create(r.Context(), &req, userID)
 	if err != nil {
 		taskHandler.log.Error("failed to create task", "error", err)
 		shared.SendError(w, r, http.StatusInternalServerError, "failed to create task")
@@ -77,10 +83,17 @@ func (taskHandler *TaskHandler) GetResult(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	result, err := taskHandler.taskService.GetResult(r.Context(), id)
+	userID, ok := shared.GetUserID(r.Context())
+	if !ok {
+		shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	result, err := taskHandler.taskService.GetResult(r.Context(), id, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrTaskNotFound):
+			taskHandler.log.Error("task not found", "error", err)
 			shared.SendError(w, r, http.StatusNotFound, "task not found")
 		default:
 			taskHandler.log.Error("failed to get task result", "error", err)
@@ -117,10 +130,17 @@ func (taskHandler *TaskHandler) GetStatus(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	status, err := taskHandler.taskService.GetStatus(r.Context(), id)
+	userID, ok := shared.GetUserID(r.Context())
+	if !ok {
+		shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	status, err := taskHandler.taskService.GetStatus(r.Context(), id, userID)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrTaskNotFound):
+			taskHandler.log.Error("task not found", "error", err)
 			shared.SendError(w, r, http.StatusNotFound, "task not found")
 		default:
 			taskHandler.log.Error("failed to get task status", "error", err)

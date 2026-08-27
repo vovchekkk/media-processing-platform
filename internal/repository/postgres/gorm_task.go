@@ -24,10 +24,10 @@ func (r *gormTask) CreateTask(ctx context.Context, task *domain.Task) error {
 	return r.db.WithContext(ctx).Create(task).Error
 }
 
-func (r *gormTask) GetTaskStatusByID(ctx context.Context, id uuid.UUID) (domain.TaskStatus, error) {
+func (r *gormTask) GetTaskStatusByIDAndUserID(ctx context.Context, id uuid.UUID, userID uuid.UUID) (domain.TaskStatus, error) {
 	var task domain.Task
 
-	err := r.db.WithContext(ctx).Select("status").First(&task, "id = ?", id).Error
+	err := r.db.WithContext(ctx).Select("status").First(&task, "id = ? AND user_id = ?", id, userID).Error
 	if err != nil {
 		return "", err
 	}
@@ -35,10 +35,10 @@ func (r *gormTask) GetTaskStatusByID(ctx context.Context, id uuid.UUID) (domain.
 	return domain.TaskStatus(task.Status), nil
 }
 
-func (r *gormTask) GetTaskResultByID(ctx context.Context, id uuid.UUID) (string, error) {
+func (r *gormTask) GetTaskResultByIDAndUserID(ctx context.Context, id uuid.UUID, userID uuid.UUID) (string, error) {
 	var task domain.Task
 
-	err := r.db.WithContext(ctx).Select("result").First(&task, "id = ?", id).Error
+	err := r.db.WithContext(ctx).Select("result").First(&task, "id = ? AND user_id = ?", id, userID).Error
 	if err != nil {
 		return "", err
 	}
@@ -46,10 +46,10 @@ func (r *gormTask) GetTaskResultByID(ctx context.Context, id uuid.UUID) (string,
 	return task.Result, nil
 }
 
-func (r *gormTask) UpdateTaskStatus(ctx context.Context, id uuid.UUID, status domain.TaskStatus) error {
-	return r.db.WithContext(ctx).Model(&domain.Task{}).Where("id = ?", id).Update("status", status).Error
+func (r *gormTask) UpdateTaskStatusByIDAndUserID(ctx context.Context, id uuid.UUID, userID uuid.UUID, status domain.TaskStatus) error {
+	return r.db.WithContext(ctx).Model(&domain.Task{}).Where("id = ? AND user_id = ?", id, userID).Update("status", status).Error
 }
 
-func (r *gormTask) SetTaskResult(ctx context.Context, id uuid.UUID, result string) error {
-	return r.db.WithContext(ctx).Model(&domain.Task{}).Where("id = ?", id).Update("result", result).Error
+func (r *gormTask) SetTaskResultByIDAndUserID(ctx context.Context, id uuid.UUID, userID uuid.UUID, result string) error {
+	return r.db.WithContext(ctx).Model(&domain.Task{}).Where("id = ? AND user_id = ?", id, userID).Update("result", result).Error
 }

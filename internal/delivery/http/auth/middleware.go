@@ -1,19 +1,14 @@
 package auth
 
 import (
-	"context"
 	"net/http"
 	"strings"
 
 	"github.com/google/uuid"
 
-	"media-processing-platform/internal/service"
 	"media-processing-platform/internal/delivery/http/shared"
+	"media-processing-platform/internal/service"
 )
-
-type ctxKey string
-
-const UserIDKey ctxKey = "user_id"
 
 func AuthMiddleware(authService *service.AuthService) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -39,7 +34,11 @@ func AuthMiddleware(authService *service.AuthService) func(http.Handler) http.Ha
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), UserIDKey, session.UserID)
+			ctx := r.Context()
+
+			ctx = shared.SetUserID(ctx, session.UserID)
+			ctx = shared.SetSessionID(ctx, session.ID)
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

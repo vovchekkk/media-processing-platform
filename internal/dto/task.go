@@ -1,10 +1,10 @@
 package dto
 
-type Task struct{
-	Filter ImageFilter `json:"filter"`
-	Image  string      `json:"image"`
-}
+import (
+	"media-processing-platform/internal/domain"
+)
 
-type ImageFilter struct {
-	Name string `json:"name"`
+type Task struct {
+	Filter domain.ImageFilter `json:"filter"`
+	Image  string             `json:"image"`
 }

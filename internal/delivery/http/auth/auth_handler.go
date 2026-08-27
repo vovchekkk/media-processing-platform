@@ -6,18 +6,18 @@ import (
 	"net/http"
 
 	"media-processing-platform/internal/delivery/http/shared"
-	"media-processing-platform/internal/service"
 	"media-processing-platform/internal/dto"
+	"media-processing-platform/internal/service"
 )
 
 type AuthHandler struct {
-	log *slog.Logger	
+	log         *slog.Logger
 	authService *service.AuthService
 }
 
 func NewAuthHandler(log *slog.Logger, authService *service.AuthService) *AuthHandler {
 	return &AuthHandler{
-		log: log,
+		log:         log,
 		authService: authService,
 	}
 }
@@ -78,4 +78,29 @@ func (authHandler *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err := json.NewEncoder(w).Encode(map[string]string{"token": token.String()}); err != nil {
 		authHandler.log.Error("failed to encode login response", "error", err)
 	}
+}
+
+// Logout godoc
+// @Summary      Выход из системы
+// @Description  Завершает текущую сессию пользователя и инвалидирует UUID токен сессии
+// @Tags         auth
+// @Security     BearerAuth
+// @Success      204  "Сессия успешно завершена"
+// @Failure      401  {object} map[string]string "Пользователь не авторизован"
+// @Failure      500  {object} map[string]string "Ошибка при завершении сессии"
+// @Router       /logout [post]
+func (authHandler *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	sessionID, ok := shared.GetSessionID(r.Context())
+	if !ok {
+		shared.SendError(w, r, http.StatusUnauthorized, "unauthorized")
+		return
+	}
+
+	if err := authHandler.authService.Logout(r.Context(), sessionID); err != nil {
+		authHandler.log.Error("failed to logout", "error", err)
+		shared.SendError(w, r, http.StatusInternalServerError, "failed to logout")
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
