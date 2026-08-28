@@ -97,8 +97,8 @@ def test_task_status_and_result(auth_token):
 
     response = requests.get(result_url, headers=headers)
     assert response.status_code == 200
-    data = response.json()
-    assert 'result' in data
+    assert response.headers["Content-Type"] == "image/png"
+    assert len(response.content) > 0
 
 def test_task_not_found(auth_token):
     invalid_task_id = str(uuid.uuid4())

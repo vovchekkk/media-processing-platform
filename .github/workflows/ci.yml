@@ -22,8 +22,20 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
-      - name: Generate env for compose
-        run: cp .env.example .env
+      - name: Generate env from secrets
+        run: |
+          cat > .env <<'EOF'
+          SERVER_PORT=8000
+          DB_PORT_HOST=5433
+          DB_USER=user
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=postgres
+          RABBITMQ_PORT_HOST=5672
+          RABBITMQ_MGMT_PORT_HOST=15672
+          RABBITMQ_USER=guest
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_QUEUE_NAME=task_queue
+          EOF
       - name: Build images
         run: make docker-compose-build
       - name: Run tests

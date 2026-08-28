@@ -1,10 +1,13 @@
 package task
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"log/slog"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"media-processing-platform/server/internal/delivery/http/shared"
 	"media-processing-platform/server/internal/domain"
@@ -66,11 +69,13 @@ func (taskHandler *TaskHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 // GetResult godoc
 // @Summary Get task result
-// @Description Returns the result of an image processing task by its ID
+// @Description Returns the processed image result of a task by its ID
 // @Tags tasks
-// @Produce json
+// @Produce image/jpeg
+// @Produce image/png
+// @Produce image/webp
 // @Param task_id path string true "Task UUID" format(uuid)
-// @Success 200 {object} GetResultResponse
+// @Success 200 {file} binary "Processed image"
 // @Failure 400 {object} map[string]string "Invalid task ID"
 // @Failure 401 {object} map[string]string "Unauthorized"
 // @Failure 404 {object} map[string]string "Task not found"
@@ -103,11 +108,44 @@ func (taskHandler *TaskHandler) GetResult(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
+	parts := strings.SplitN(result, ",", 2)
+	if len(parts) != 2 {
+		taskHandler.log.Error("invalid image data URL")
+		shared.SendError(w, r, http.StatusInternalServerError, "invalid image result")
+		return
+	}
+
+	metadata := parts[0]
+	base64Data := parts[1]
+
+	contentType := "application/octet-stream"
+
+	switch {
+	case strings.HasPrefix(metadata, "data:image/jpeg"):
+		contentType = "image/jpeg"
+	case strings.HasPrefix(metadata, "data:image/png"):
+		contentType = "image/png"
+	case strings.HasPrefix(metadata, "data:image/webp"):
+		contentType = "image/webp"
+	}
+
+	imageData, err := base64.StdEncoding.DecodeString(base64Data)
+	if err != nil {
+		taskHandler.log.Error(
+			"failed to decode image result",
+			"task_id", id,
+			"error", err,
+		)
+		shared.SendError(w, r, http.StatusInternalServerError, "invalid image data")
+		return
+	}
+
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Content-Length", strconv.Itoa(len(imageData)))
 	w.WriteHeader(http.StatusOK)
 
-	if err := json.NewEncoder(w).Encode(map[string]string{"result": result}); err != nil {
-		taskHandler.log.Error("failed to encode get_result response", "error", err)
+	if _, err := w.Write(imageData); err != nil {
+		taskHandler.log.Error("failed to write image response", "task_id", id, "error", err)
 	}
 }
 
