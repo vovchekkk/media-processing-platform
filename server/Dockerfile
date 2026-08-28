@@ -7,13 +7,13 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o /app/server ./cmd/server
+RUN go build -o /out/server ./server/cmd/
 
 
 FROM debian:bookworm-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/server ./server
+COPY --from=builder /out/server /usr/local/bin/server
 
-CMD ["./server"]
+CMD ["/usr/local/bin/server"]

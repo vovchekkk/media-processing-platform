@@ -9,6 +9,7 @@ import (
 	"media-processing-platform/server/internal/config"
 	router "media-processing-platform/server/internal/delivery/http"
 	"media-processing-platform/server/internal/infrastructure/postgres"
+	"media-processing-platform/server/internal/infrastructure/rabbitmq"
 	"media-processing-platform/server/internal/repository/postgres"
 	"media-processing-platform/server/internal/service"
 )
@@ -42,10 +43,17 @@ func main() {
 	taskRepository := postgres.NewGormTaskRepository(db)
 	sessionRepository := postgres.NewGormSessionRepository(db)
 
-	taskProcessor := service.NewTaskProcessor(cfg.TaskProcessorConfig, taskRepository, logger)
+	connManager, err := rabbitmq.NewConnectionManager(cfg.RabbitMQConfig, logger)
+	if err != nil {
+		logger.Error("fatal: failed to initialize RabbitMQ connection manager", "error", err)
+		os.Exit(1)
+	}
+	defer connManager.Close()
+
+	taskProducer := rabbitmq.NewProducer(connManager, cfg.RabbitMQConfig.QueueName, logger)
 
 	authService := service.NewAuthService(userRepository, sessionRepository)
-	taskService := service.NewTaskService(taskRepository, taskProcessor)
+	taskService := service.NewTaskService(taskRepository, taskProducer)
 
 	appRouter := router.InitRouter(logger, authService, taskService)
 

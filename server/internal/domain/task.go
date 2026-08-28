@@ -7,6 +7,7 @@ type TaskStatus string
 const (
 	StatusInProgress TaskStatus = "in_progress"
 	StatusReady      TaskStatus = "ready"
+	StatusFailed     TaskStatus = "failed"
 )
 
 type Task struct {
@@ -21,5 +22,6 @@ type Task struct {
 }
 
 type ImageFilter struct {
-	Name string `json:"name"`
+	Name       string         `json:"name"`
+	Parameters map[string]any `json:"parameters"`
 }

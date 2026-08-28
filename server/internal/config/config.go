@@ -12,11 +12,11 @@ import (
 )
 
 type Config struct {
-	Env                 string `yaml:"env" env-default:"development"`
-	StoragePath         string `yaml:"storage_path" env-required:"true"`
-	HTTPServer          `yaml:"http_server"`
-	TaskProcessorConfig `yaml:"task_processor"`
-	DatabaseConfig      `yaml:"db"`
+	Env            string `yaml:"env" env-default:"development"`
+	StoragePath    string `yaml:"storage_path" env-required:"true"`
+	HTTPServer     `yaml:"http_server"`
+	DatabaseConfig `yaml:"db"`
+	RabbitMQConfig `yaml:"rabbitmq"`
 }
 
 type HTTPServer struct {
@@ -30,10 +30,6 @@ func (s HTTPServer) Address() string {
 	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
 }
 
-type TaskProcessorConfig struct {
-	ProcessingDuration time.Duration `yaml:"processing_duration" env-default:"30s"`
-}
-
 type DatabaseConfig struct {
 	Host     string `yaml:"host" env:"DB_HOST" env-required:"true"`
 	User     string `yaml:"user" env:"DB_USER" env-required:"true"`
@@ -41,6 +37,21 @@ type DatabaseConfig struct {
 	DBName   string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
 	Port     string `yaml:"port" env:"DB_PORT" env-required:"true"`
 	SSLMode  string `yaml:"sslmode" env:"DB_SSL_MODE" env-required:"true"`
+}
+
+type RabbitMQConfig struct {
+	Host       string                   `yaml:"host" env:"RABBITMQ_HOST" env-required:"true"`
+	Port       string                   `yaml:"port" env:"RABBITMQ_PORT" env-required:"true"`
+	User       string                   `yaml:"user" env:"RABBITMQ_USER" env-required:"true"`
+	Password   string                   `yaml:"password" env:"RABBITMQ_PASSWORD" env-required:"true"`
+	QueueName  string                   `yaml:"queue_name" env:"RABBITMQ_QUEUE_NAME" env-required:"true"`
+	Connection RabbitMQConnectionConfig `yaml:"connection"`
+}
+
+type RabbitMQConnectionConfig struct {
+	InitialBackoff    time.Duration `yaml:"initial_backoff" env-default:"1s"`
+	MaxRetries        int           `yaml:"max_retries" env-default:"5"`
+	ReconnectInterval time.Duration `yaml:"reconnect_interval" env-default:"2s"`
 }
 
 func (dbConfig DatabaseConfig) DSN() string {
@@ -51,6 +62,16 @@ func (dbConfig DatabaseConfig) DSN() string {
 		dbConfig.DBName,
 		dbConfig.Port,
 		dbConfig.SSLMode)
+}
+
+func (r RabbitMQConfig) DSN() string {
+	return fmt.Sprintf(
+		"amqp://%s:%s@%s:%s/",
+		r.User,
+		r.Password,
+		r.Host,
+		r.Port,
+	)
 }
 
 func MustLoad() *Config {

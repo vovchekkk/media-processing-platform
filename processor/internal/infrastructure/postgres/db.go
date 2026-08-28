@@ -9,8 +9,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"media-processing-platform/server/internal/config"
-	"media-processing-platform/server/internal/domain"
+	"media-processing-platform/processor/internal/config"
 )
 
 func InitDB(cfg config.DatabaseConfig, log *slog.Logger) *gorm.DB {
@@ -35,25 +34,6 @@ func InitDB(cfg config.DatabaseConfig, log *slog.Logger) *gorm.DB {
 	}
 
 	log.Info("successfully connected to database", "host", cfg.Host, "port", cfg.Port)
-
-	log.Info("running database auto-migrations...")
-
-	if err := db.AutoMigrate(&domain.User{}); err != nil {
-		log.Error("failed to run database auto-migrations", "error", err)
-		os.Exit(1)
-	}
-
-	if err := db.AutoMigrate(&domain.Session{}); err != nil {
-		log.Error("failed to run database auto-migrations", "error", err)
-		os.Exit(1)
-	}
-
-	if err := db.AutoMigrate(&domain.Task{}); err != nil {
-		log.Error("failed to run database auto-migrations", "error", err)
-		os.Exit(1)
-	}
-
-	log.Info("successfully ran database auto-migrations")
 
 	return db
 }

@@ -14,8 +14,12 @@ docker-run:
 local-postgresql:
 	sudo service postgresql start
 docker-compose-build:
-	docker compose -f deployments/docker-compose.yml build
+	docker compose --env-file .env -f deployments/docker-compose.yml build
 docker-compose-up:
-	docker compose -f deployments/docker-compose.yml up
+	docker compose --env-file .env -f deployments/docker-compose.yml up
 docker-compose-down:
-	docker compose -f deployments/docker-compose.yml down
+	docker compose --env-file .env -f deployments/docker-compose.yml down -v
+proto:
+	protoc -I=. \
+           --go_out=. --go_opt=paths=source_relative \
+           pkg/proto/task.proto
