@@ -1,16 +1,5 @@
-run:
-	CONFIG_PATH=./config/config.yaml go run ./cmd/server
 swagger update:
-	swag init -g cmd/server/main.go --parseInternal --parseDependency
-docker-build:
-	docker build -t media-processing-platform .
-docker-run:
-	docker run --rm \
-		-p 8000:8000 \
-		-e CONFIG_PATH=/app/config/config.yaml \
-		-e DB_HOST=host.docker.internal \
-		-v "$(PWD)/config/config.yaml:/app/config/config.yaml:ro" \
-		media-processing-platform
+	swag init -g server/cmd/main.go --parseInternal --parseDependency
 local-postgresql:
 	sudo service postgresql start
 docker-compose-build:
@@ -18,7 +7,9 @@ docker-compose-build:
 docker-compose-up:
 	docker compose --env-file .env -f deployments/docker-compose.yml up
 docker-compose-down:
-	docker compose --env-file .env -f deployments/docker-compose.yml down -v
+	docker compose --env-file .env -f deployments/docker-compose.yml down
+docker-compose-test:
+	docker compose --env-file .env --profile test -f deployments/docker-compose.yml run --rm tests
 proto:
 	protoc -I=. \
            --go_out=. --go_opt=paths=source_relative \

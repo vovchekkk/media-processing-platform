@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"media-processing-platform/processor/internal/config"
+	"media-processing-platform/processor/internal/filter"
 	database "media-processing-platform/processor/internal/infrastructure/postgres"
 	"media-processing-platform/processor/internal/infrastructure/rabbitmq"
 	"media-processing-platform/processor/internal/repository/postgres"
@@ -38,7 +39,16 @@ func main() {
 
 	taskConsumer := rabbitmq.NewConsumer(connManager, cfg.RabbitMQConfig.QueueName, logger)
 
-	processorService := service.NewProcessorService(taskRepository, logger)
+	registry := filter.NewRegistry(
+		&filter.Blur{},
+		&filter.Negative{},
+		&filter.FlipX{},
+		&filter.Sharpen{},
+	)
+
+	imageService := service.NewImageService(registry)
+
+	processorService := service.NewProcessorService(taskRepository, imageService, logger)
 
 	ctx, cancel := context.WithCancel(context.Background())
 

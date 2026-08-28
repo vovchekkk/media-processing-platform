@@ -55,8 +55,8 @@ func (taskService *TaskService) Create(ctx context.Context, taskDTO *dto.Task, u
 		Id:    task.ID.String(),
 		Image: task.Image,
 		Filter: &pb.Filter{
-			Name:           taskDTO.Filter.Name,
-			ParametersJson: protoParams,
+			Name:       taskDTO.Filter.Name,
+			Parameters: protoParams,
 		},
 	}
 

@@ -23,11 +23,11 @@ const (
 )
 
 type Filter struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	ParametersJson *structpb.Struct       `protobuf:"bytes,2,opt,name=parameters_json,json=parametersJson,proto3" json:"parameters_json,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Parameters    *structpb.Struct       `protobuf:"bytes,2,opt,name=parameters,proto3" json:"parameters,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Filter) Reset() {
@@ -67,9 +67,9 @@ func (x *Filter) GetName() string {
 	return ""
 }
 
-func (x *Filter) GetParametersJson() *structpb.Struct {
+func (x *Filter) GetParameters() *structpb.Struct {
 	if x != nil {
-		return x.ParametersJson
+		return x.Parameters
 	}
 	return nil
 }
@@ -138,10 +138,12 @@ var File_pkg_proto_task_proto protoreflect.FileDescriptor
 
 const file_pkg_proto_task_proto_rawDesc = "" +
 	"\n" +
-	"\x14pkg/proto/task.proto\x12\x04task\x1a\x1cgoogle/protobuf/struct.proto\"^\n" +
+	"\x14pkg/proto/task.proto\x12\x04task\x1a\x1cgoogle/protobuf/struct.proto\"U\n" +
 	"\x06Filter\x12\x12\n" +
-	"\x04name\x18\x01 \x01(\tR\x04name\x12@\n" +
-	"\x0fparameters_json\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x0eparametersJson\"Y\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x127\n" +
+	"\n" +
+	"parameters\x18\x02 \x01(\v2\x17.google.protobuf.StructR\n" +
+	"parameters\"Y\n" +
 	"\vTaskMessage\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\tR\x05image\x12$\n" +
@@ -166,7 +168,7 @@ var file_pkg_proto_task_proto_goTypes = []any{
 	(*structpb.Struct)(nil), // 2: google.protobuf.Struct
 }
 var file_pkg_proto_task_proto_depIdxs = []int32{
-	2, // 0: task.Filter.parameters_json:type_name -> google.protobuf.Struct
+	2, // 0: task.Filter.parameters:type_name -> google.protobuf.Struct
 	0, // 1: task.TaskMessage.filter:type_name -> task.Filter
 	2, // [2:2] is the sub-list for method output_type
 	2, // [2:2] is the sub-list for method input_type

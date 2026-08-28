@@ -82,5 +82,22 @@ services:
       timeout: 5s
       retries: 5
 
+  tests:
+    image: python:3.12-alpine
+    profiles:
+      - test
+    working_dir: /
+    volumes:
+      - ../static/sigma.png:/static/sigma.png:ro
+      - ../tests/tests.py:/tests/tests.py:ro
+    command: >
+      sh -c "pip install --no-cache-dir pytest requests &&
+             pytest tests/tests.py"
+    depends_on:
+      server:
+        condition: service_started
+      processor:
+        condition: service_started
+
 volumes:
   postgres_data:

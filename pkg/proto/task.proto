@@ -7,7 +7,7 @@ import "google/protobuf/struct.proto";
 
 message Filter {
   string name = 1;
-  google.protobuf.Struct parameters_json = 2;
+  google.protobuf.Struct parameters = 2;
 }
 
 message TaskMessage {
