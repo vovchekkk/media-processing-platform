@@ -3,6 +3,5 @@
 .env
 tests
 static
-server/docs
 *.md
 Makefile
