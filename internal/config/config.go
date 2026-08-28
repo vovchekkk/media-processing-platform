@@ -40,7 +40,7 @@ type DatabaseConfig struct {
 	Password string `yaml:"password" env:"DB_PASSWORD" env-required:"true"`
 	DBName   string `yaml:"dbname" env:"DB_NAME" env-required:"true"`
 	Port     string `yaml:"port" env:"DB_PORT" env-required:"true"`
-	SSLMode  string `yaml:"sslmode" end:"DB_SSL_MODE" env-required:"true"`
+	SSLMode  string `yaml:"sslmode" env:"DB_SSL_MODE" env-required:"true"`
 }
 
 func (dbConfig DatabaseConfig) DSN() string {

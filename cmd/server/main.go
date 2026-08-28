@@ -5,13 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/go-playground/validator"
-
 	_ "media-processing-platform/docs"
 	"media-processing-platform/internal/config"
 	router "media-processing-platform/internal/delivery/http"
-	"media-processing-platform/internal/infrastructure/database"
-	"media-processing-platform/internal/repository"
+	"media-processing-platform/internal/infrastructure/postgres"
+	"media-processing-platform/internal/repository/postgres"
 	"media-processing-platform/internal/service"
 )
 
@@ -21,6 +19,14 @@ const (
 	envProd  = "production"
 )
 
+// @title           Media Processing Platform API
+// @version         1.0
+// @description     API Server for Media Processing Platform
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Введите токен в формате: Bearer <UUID_токен_сессии>
 func main() {
 	cfg := config.MustLoad()
 
@@ -32,13 +38,16 @@ func main() {
 
 	db := database.InitDB(cfg.DatabaseConfig, logger)
 
-	taskRepository := repository.NewGormTaskRepository(db)
-
-	validate := validator.New()
+	userRepository := postgres.NewGormUserRepository(db)
+	taskRepository := postgres.NewGormTaskRepository(db)
+	sessionRepository := postgres.NewGormSessionRepository(db)
 
 	taskProcessor := service.NewTaskProcessor(cfg.TaskProcessorConfig, taskRepository, logger)
 
-	appRouter := router.InitRouter(logger, taskRepository, validate, taskProcessor)
+	authService := service.NewAuthService(userRepository, sessionRepository)
+	taskService := service.NewTaskService(taskRepository, taskProcessor)
+
+	appRouter := router.InitRouter(logger, authService, taskService)
 
 	logger.Info("starting server", slog.String("address", cfg.Address()))
 

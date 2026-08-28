@@ -1,6 +1,4 @@
 definitions:
-  internal_delivery_http_task.CreateRequest:
-    type: object
   internal_delivery_http_task.CreateResponse:
     properties:
       task_id:
@@ -16,13 +14,6 @@ definitions:
       status:
         $ref: '#/definitions/media-processing-platform_internal_domain.TaskStatus'
     type: object
-  media-processing-platform_internal_delivery_http_shared.Response:
-    properties:
-      error:
-        type: string
-      response_status:
-        type: string
-    type: object
   media-processing-platform_internal_domain.TaskStatus:
     enum:
     - in_progress
@@ -31,12 +22,105 @@ definitions:
     x-enum-varnames:
     - StatusInProgress
     - StatusReady
+  media-processing-platform_internal_dto.ImageFilter:
+    properties:
+      name:
+        type: string
+    type: object
+  media-processing-platform_internal_dto.Task:
+    properties:
+      filter:
+        $ref: '#/definitions/media-processing-platform_internal_dto.ImageFilter'
+      image:
+        type: string
+    type: object
+  media-processing-platform_internal_dto.User:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
 info:
   contact: {}
+  description: API Server for Media Processing Platform
+  title: Media Processing Platform API
+  version: "1.0"
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Проверяет учетные данные и возвращает UUID токен сессии
+      parameters:
+      - description: Данные для входа
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media-processing-platform_internal_dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает token в JSON
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Неверный формат запроса
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Неверный логин или пароль
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Аутентификация пользователя
+      tags:
+      - auth
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Создает аккаунт пользователя с переданными DTO данными
+      parameters:
+      - description: Данные для регистрации
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/media-processing-platform_internal_dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Пользователь успешно зарегистрирован
+        "400":
+          description: Неверный формат запроса или валидация не пройдена
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация нового пользователя
+      tags:
+      - auth
   /result/{task_id}:
     get:
-      description: Returns the processing result of a task by its ID
+      description: Returns the result of an image processing task by its ID
       parameters:
       - description: Task UUID
         format: uuid
@@ -52,13 +136,31 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.GetResultResponse'
         "400":
-          description: Bad Request
+          description: Invalid task ID
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Task not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Get task result
       tags:
       - tasks
@@ -80,13 +182,31 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.GetStatusResponse'
         "400":
-          description: Bad Request
+          description: Invalid task ID
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Task not found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Get task status
       tags:
       - tasks
@@ -94,14 +214,15 @@ paths:
     post:
       consumes:
       - application/json
-      description: Creates a new media processing task
+      description: Creates a new image processing task. The image must be provided
+        as a Base64-encoded string.
       parameters:
       - description: Task creation request
         in: body
         name: request
         required: true
         schema:
-          $ref: '#/definitions/internal_delivery_http_task.CreateRequest'
+          $ref: '#/definitions/media-processing-platform_internal_dto.Task'
       produces:
       - application/json
       responses:
@@ -110,14 +231,32 @@ paths:
           schema:
             $ref: '#/definitions/internal_delivery_http_task.CreateResponse'
         "400":
-          description: Bad Request
+          description: Invalid request body
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
         "500":
-          description: Internal Server Error
+          description: Internal server error
           schema:
-            $ref: '#/definitions/media-processing-platform_internal_delivery_http_shared.Response'
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
       summary: Create task
       tags:
       - tasks
+securityDefinitions:
+  BearerAuth:
+    description: 'Введите токен в формате: Bearer <UUID_токен_сессии>'
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
