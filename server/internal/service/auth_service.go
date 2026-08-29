@@ -9,15 +9,18 @@ import (
 	"media-processing-platform/server/internal/domain"
 	"media-processing-platform/server/internal/dto"
 	"media-processing-platform/server/internal/repository"
+	"media-processing-platform/server/internal/config"
 )
 
 type AuthService struct {
+	cfg               config.AuthConfig
 	userRepository    repository.User
 	sessionRepository repository.Session
 }
 
-func NewAuthService(userRepo repository.User, sessionRepo repository.Session) *AuthService {
+func NewAuthService(cfg config.AuthConfig, userRepo repository.User, sessionRepo repository.Session) *AuthService {
 	return &AuthService{
+		cfg:               cfg,
 		userRepository:    userRepo,
 		sessionRepository: sessionRepo,
 	}
@@ -68,7 +71,7 @@ func (authService *AuthService) Login(ctx context.Context, userDTO *dto.User) (u
 		UserID: user.ID,
 	}
 
-	if err := authService.sessionRepository.CreateSession(ctx, session); err != nil {
+	if err := authService.sessionRepository.CreateSession(ctx, session, authService.cfg.TTL); err != nil {
 		return uuid.Nil, err
 	}
 

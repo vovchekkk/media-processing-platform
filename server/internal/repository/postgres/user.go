@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"errors"
 
 	"gorm.io/gorm"
 
@@ -28,7 +29,11 @@ func (r *gormUser) GetByUsername(ctx context.Context, username string) (*domain.
 
 	err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error
 	if err != nil {
-		return nil, err
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+            return nil, domain.ErrUserNotFound
+        }
+
+        return nil, err
 	}
 
 	return &user, nil

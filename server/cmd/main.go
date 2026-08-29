@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log/slog"
 	"net/http"
 	"os"
@@ -8,10 +9,12 @@ import (
 	_ "media-processing-platform/server/docs"
 	"media-processing-platform/server/internal/config"
 	router "media-processing-platform/server/internal/delivery/http"
-	"media-processing-platform/server/internal/infrastructure/postgres"
-	"media-processing-platform/server/internal/infrastructure/rabbitmq"
-	"media-processing-platform/server/internal/repository/postgres"
 	"media-processing-platform/server/internal/service"
+	postgresInfrastructure "media-processing-platform/server/internal/infrastructure/postgres"
+	"media-processing-platform/server/internal/infrastructure/rabbitmq"
+	postgresRepo "media-processing-platform/server/internal/repository/postgres"
+	redisRepo "media-processing-platform/server/internal/repository/redis"
+	redisInfrastructure "media-processing-platform/server/internal/infrastructure/redis"
 )
 
 const (
@@ -31,17 +34,22 @@ const (
 func main() {
 	cfg := config.MustLoad()
 
+	ctx := context.Background()
+
 	logger := setupLogger(cfg.Env)
 	logger = logger.With(slog.String("env", cfg.Env))
 
-	logger.Info("initializing server", slog.String("address", cfg.Address()))
+	logger.Info("initializing server", slog.String("address", cfg.HTTPServer.Address()))
 	logger.Debug("logger debug mode enabled")
 
-	db := database.InitDB(cfg.DatabaseConfig, logger)
+	postgresDB := postgresInfrastructure.InitDB(cfg.DatabaseConfig, logger)
 
-	userRepository := postgres.NewGormUserRepository(db)
-	taskRepository := postgres.NewGormTaskRepository(db)
-	sessionRepository := postgres.NewGormSessionRepository(db)
+	userRepository := postgresRepo.NewGormUserRepository(postgresDB)
+	taskRepository := postgresRepo.NewGormTaskRepository(postgresDB)
+
+	redisDB := redisInfrastructure.InitDB(ctx, cfg.RedisConfig, logger)
+
+	sessionRepository := redisRepo.NewRedisSessionRepository(redisDB)
 
 	connManager, err := rabbitmq.NewConnectionManager(cfg.RabbitMQConfig, logger)
 	if err != nil {
@@ -52,14 +60,14 @@ func main() {
 
 	taskProducer := rabbitmq.NewProducer(connManager, cfg.RabbitMQConfig.QueueName, logger)
 
-	authService := service.NewAuthService(userRepository, sessionRepository)
+	authService := service.NewAuthService(cfg.AuthConfig, userRepository, sessionRepository)
 	taskService := service.NewTaskService(taskRepository, taskProducer)
 
 	appRouter := router.InitRouter(logger, authService, taskService)
 
-	logger.Info("starting server", slog.String("address", cfg.Address()))
+	logger.Info("starting server", slog.String("address", cfg.HTTPServer.Address()))
 
-	if err := http.ListenAndServe(cfg.Address(), appRouter); err != nil {
+	if err := http.ListenAndServe(cfg.HTTPServer.Address(), appRouter); err != nil {
 		logger.Error("failed to start server", "error", err)
 		os.Exit(1)
 	}

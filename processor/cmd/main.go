@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"media-processing-platform/processor/internal/config"
 	"media-processing-platform/processor/internal/filter"
-	database "media-processing-platform/processor/internal/infrastructure/postgres"
+	postgresInfrastructure "media-processing-platform/processor/internal/infrastructure/postgres"
 	"media-processing-platform/processor/internal/infrastructure/rabbitmq"
-	"media-processing-platform/processor/internal/repository/postgres"
+	postgresRepo "media-processing-platform/processor/internal/repository/postgres"
 	"media-processing-platform/processor/internal/service"
 	"os"
 	"os/signal"
@@ -26,9 +26,12 @@ func main() {
 	logger := setupLogger(cfg.Env)
 	logger = logger.With(slog.String("env", cfg.Env))
 
-	db := database.InitDB(cfg.DatabaseConfig, logger)
+	logger.Info("initializing proceessor")
+	logger.Debug("logger debug mode enabled")
 
-	taskRepository := postgres.NewGormTaskRepository(db)
+	db := postgresInfrastructure.InitDB(cfg.DatabaseConfig, logger)
+
+	taskRepository := postgresRepo.NewGormTaskRepository(db)
 
 	connManager, err := rabbitmq.NewConnectionManager(cfg.RabbitMQConfig, logger)
 	if err != nil {
