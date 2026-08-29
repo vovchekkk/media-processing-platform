@@ -7,11 +7,14 @@ import (
 	"media-processing-platform/processor/internal/filter"
 	postgresInfrastructure "media-processing-platform/processor/internal/infrastructure/postgres"
 	"media-processing-platform/processor/internal/infrastructure/rabbitmq"
+	"media-processing-platform/processor/internal/metrics"
 	postgresRepo "media-processing-platform/processor/internal/repository/postgres"
 	"media-processing-platform/processor/internal/service"
 	"os"
 	"os/signal"
 	"syscall"
+	router "media-processing-platform/processor/internal/delivery/http"
+	"net/http"
 )
 
 const (
@@ -26,7 +29,7 @@ func main() {
 	logger := setupLogger(cfg.Env)
 	logger = logger.With(slog.String("env", cfg.Env))
 
-	logger.Info("initializing proceessor")
+	logger.Info("initializing processor", slog.String("address", cfg.HTTPServer.Address()))
 	logger.Debug("logger debug mode enabled")
 
 	db := postgresInfrastructure.InitDB(cfg.DatabaseConfig, logger)
@@ -51,7 +54,20 @@ func main() {
 
 	imageService := service.NewImageService(registry)
 
-	processorService := service.NewProcessorService(taskRepository, imageService, logger)
+	metricsInstance := metrics.New()
+
+	processorService := service.NewProcessorService(taskRepository, imageService, metricsInstance, logger)
+
+	appRouter := router.InitRouter(logger)
+
+	logger.Info("starting processor", slog.String("address", cfg.HTTPServer.Address()))
+
+	go func() {
+		if err := http.ListenAndServe(cfg.HTTPServer.Address(), appRouter); err != nil {
+			logger.Error("failed to start processor", "error", err)
+			os.Exit(1)
+		}
+	}()
 
 	ctx, cancel := context.WithCancel(context.Background())
 

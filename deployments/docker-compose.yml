@@ -40,6 +40,8 @@ services:
     build:
       context: ..
       dockerfile: processor/Dockerfile
+    ports:
+      - "${PROCESSOR_PORT}:2112"
     environment:
       CONFIG_PATH: /app/processor/config/config.yaml
 
@@ -111,6 +113,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+  
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "${PROMETHEUS_PORT_HOST}:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - processor
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "${GRAFANA_PORT_HOST}:3000"
+    volumes:
+      - ../grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus
 
   tests:
     image: python:3.12-alpine
@@ -127,6 +147,10 @@ services:
       server:
         condition: service_started
       processor:
+        condition: service_started
+      prometheus:
+        condition: service_started
+      grafana:
         condition: service_started
 
 volumes:

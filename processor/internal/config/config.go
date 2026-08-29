@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	"net"
 	"os"
 	"time"
 
@@ -12,8 +13,20 @@ import (
 type Config struct {
 	Env            string `yaml:"env" env-default:"development"`
 	StoragePath    string `yaml:"storage_path" env-required:"true"`
+	HTTPServer     `yaml:"http_server"`
 	DatabaseConfig `yaml:"db"`
 	RabbitMQConfig `yaml:"rabbitmq"`
+}
+
+type HTTPServer struct {
+	Host        string        `yaml:"host" env-default:"localhost"`
+	Port        string        `yaml:"port" env-default:"2112"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
+}
+
+func (s HTTPServer) Address() string {
+	return net.JoinHostPort(s.Host, s.Port)
 }
 
 type DatabaseConfig struct {
