@@ -1,4 +1,4 @@
-# Media Processing Platform
+﻿# Media Processing Platform
 
 Асинхронная платформа обработки изображений на Go: REST API принимает задачи, RabbitMQ распределяет их между воркерами, результат возвращается клиенту. Построена по принципу event-driven архитектуры с полным разделением API-шлюза и вычислительного воркера.
 
@@ -65,29 +65,29 @@
 
 ## Ключевые решения
 
-- **Асинхронность через брокер сообщений** — API не выполняет тяжёлую обработку, воркер масштабируется независимо.
-- **protobuf вместо JSON в шине** — компактная и быстрая сериализация бинарных данных между сервисами.
-- **Плагинная система фильтров** — единый интерфейс `Filter` + реестр; новый фильтр добавляется одной строкой без правки ядра.
-- **Ручной ack/nack в консьюмере** — гарантирует обработку сообщения и предсказуемое поведение при ошибках.
-- **Устойчивый к обрывам коннект к RabbitMQ** — экспоненциальный бэкофф + фоновый reconnect-цикл.
-- **Чистая архитектура** — изоляция слоёв, внедрение зависимостей через конструкторы, compile-time проверка интерфейсов репозиториев.
-- **Multi-stage Docker-сборка** — минимальный runtime-образ (debian-slim) без инструментов сборки.
+- **Асинхронность через брокер сообщений** - API не выполняет тяжёлую обработку, воркер масштабируется независимо.
+- **protobuf вместо JSON в шине** - компактная и быстрая сериализация бинарных данных между сервисами.
+- **Плагинная система фильтров** - единый интерфейс `Filter` + реестр; новый фильтр добавляется одной строкой без правки ядра.
+- **Ручной ack/nack в консьюмере** - гарантирует обработку сообщения и предсказуемое поведение при ошибках.
+- **Устойчивый к обрывам коннект к RabbitMQ** - экспоненциальный бэкофф + фоновый reconnect-цикл.
+- **Чистая архитектура** - изоляция слоёв, внедрение зависимостей через конструкторы, compile-time проверка интерфейсов репозиториев.
+- **Multi-stage Docker-сборка** - минимальный runtime-образ (debian-slim) без инструментов сборки.
 
 ## Технологический стек
 
-- **Язык:** Go 1.26
-- **HTTP:** chi v5, swaggo/swag (Swagger), slog-chi
+- **Язык:** Go 1.26 (горутины, каналы, context)
+- **HTTP:** chi v5 (роутер, мидлвари), swaggo/swag (Swagger), slog-chi
 - **БД:** PostgreSQL 18 + GORM v2 (JSONB-сериализация, auto-migration)
-- **Кэш:** Redis 7 (сессии)
-- **Брокер:** RabbitMQ 3 (AMQP), `amqp091-go`
-- **Сериализация:** Protocol Buffers (protoc-gen-go)
-- **Обработка изображений:** `image`, `image/color`, `disintegration/imaging`
-- **Безопасность:** bcrypt
-- **Метрики:** Prometheus client_golang, promhttp
+- **Кэш:** Redis 7 (сессии с TTL)
+- **Брокер:** RabbitMQ 3 (AMQP), `amqp091-go` (persistent-доставка, ack/nack)
+- **Сериализация:** Protocol Buffers (protoc-gen-go, google.protobuf.Struct)
+- **Обработка изображений:** `image`, `image/color`, `disintegration/imaging` (base64 ↔ PNG)
+- **Безопасность:** bcrypt (хеширование паролей)
+- **Метрики:** Prometheus client_golang (histogram, counter), promhttp
 - **Логирование:** log/slog (text/JSON по окружению)
-- **Конфигурация:** cleanenv (YAML + env-переменные)
-- **Инфраструктура:** Docker, docker-compose, GitHub Actions
-- **Тесты:** pytest, requests
+- **Конфигурация:** cleanenv (YAML + переопределение env-переменными)
+- **Инфраструктура:** Docker (multi-stage), docker-compose, GitHub Actions
+- **Тесты:** pytest, requests (интеграционные, e2e-сценарии)
 
 ## Структура репозитория
 
@@ -130,15 +130,15 @@ media-processing-platform/
 
 **API (`server`)**
 
-- `POST /register` — регистрация (bcrypt-хеширование пароля)
-- `POST /login` — вход, возвращает `{"token": "<uuid-сессии>"}`
-- `POST /logout` — выход, инвалидация сессии
-- `POST /task` — создание задачи `{"filter": {"name": "...", "parameters": {...}}, "image": "<base64>"}`
-- `GET /status/{task_id}` — статус: `in_progress` / `ready` / `failed`
-- `GET /result/{task_id}` — результат (изображение, content-type из data-URI)
-- `GET /swagger/*` — документация API
+- `POST /register` - регистрация (bcrypt-хеширование пароля)
+- `POST /login` - вход, возвращает `{"token": "<uuid-сессии>"}`
+- `POST /logout` - выход, инвалидация сессии
+- `POST /task` - создание задачи `{"filter": {"name": "...", "parameters": {...}}, "image": "<base64>"}`
+- `GET /status/{task_id}` - статус: `in_progress` / `ready` / `failed`
+- `GET /result/{task_id}` - результат (изображение, content-type из data-URI)
+- `GET /swagger/*` - документация API
 
-Все роуты задач защищены `Bearer`-мидлварью; `user_id`/`session_id` пробрасываются в контекст запроса.
+Все роуты задач защищены `Bearer-middleware`; `user_id`/`session_id` пробрасываются в контекст запроса.
 
 **Воркер (`processor`)**
 
@@ -159,7 +159,7 @@ cp .env.example .env
 # 2. Собрать образы
 make docker-compose-build
 
-# 3. Запустить весь стек (server, processor, postgres, rabbitmq, redis, prometheus, grafana)
+# 3. �-апустить весь стек (server, processor, postgres, rabbitmq, redis, prometheus, grafana)
 make docker-compose-up
 
 # 4. Остановить
@@ -184,7 +184,7 @@ curl -X POST http://localhost:8000/register \
   -H 'Content-Type: application/json' \
   -d '{"username":"demo","password":"secret"}'
 
-# Вход — получите токен
+# Вход - получите токен
 curl -X POST http://localhost:8000/login \
   -H 'Content-Type: application/json' \
   -d '{"username":"demo","password":"secret"}'
@@ -209,7 +209,7 @@ curl http://localhost:8000/result/<task_id> -H "Authorization: Bearer $TOKEN" \
 
 ## Тестирование
 
-Интеграционные тесты поднимают изолированный стек (профиль `test` в compose) и проверяют весь жизненный цикл: регистрация → вход → создание задачи → ожидание `ready` → получение результата, плюс негативные сценарии (404, 401).
+Тесты поднимают изолированный стек (профиль `test` в compose) и проверяют весь жизненный цикл: регистрация → вход → создание задачи → ожидание `ready` → получение результата, плюс негативные сценарии (404, 401).
 
 ```bash
 make docker-compose-test
@@ -220,16 +220,16 @@ CI (GitHub Actions) выполняет `go build`/`go vet`/`go test` и прог
 ## Решение проблем
 
 **Тест падает: «task is still in progress!»**
-Задача не обрабатывается воркером. Проверьте: запущен ли `processor` (`docker compose ps`), читает ли он очередь (`docker logs deployments-processor-1`), и совпадает ли имя очереди у сервера и воркера (`RABBITMQ_QUEUE_NAME`).
+�-адача не обрабатывается воркером. Проверьте: запущен ли `processor` (`docker compose ps`), читает ли он очередь (`docker logs deployments-processor-1`), и совпадает ли имя очереди у сервера и воркера (`RABBITMQ_QUEUE_NAME`).
 
 **API не стартует: «connection refused» к RabbitMQ/Postgres**
-Скорее всего, не совпадают пароли между `.env` и контейнерами. RabbitMQ берёт креды из `RABBITMQ_DEFAULT_USER/PASS` (см. `deployments/docker-compose.yml`) — они должны совпадать с `RABBITMQ_USER/RABBITMQ_PASSWORD` в `.env`.
+Скорее всего, не совпадают пароли между `.env` и контейнерами. RabbitMQ берёт креды из `RABBITMQ_DEFAULT_USER/PASS` (см. `deployments/docker-compose.yml`) - они должны совпадать с `RABBITMQ_USER/RABBITMQ_PASSWORD` в `.env`.
 
 **`/metrics` пустой**
 Убедитесь, что воркер пересобран с метриками (`make docker-compose-build`) и порт 2112 опубликован (`PROCESSOR_PORT`).
 
 **Grafana не видит Prometheus**
-Проверьте датасорс в `deployments/grafana/provisioning/datasources/` — URL должен указывать на `http://prometheus:9090`.
+Проверьте датасорс в `deployments/grafana/provisioning/datasources/` - URL должен указывать на `http://prometheus:9090`.
 
 ## Лицензия
 
