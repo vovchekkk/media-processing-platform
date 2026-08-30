@@ -1,0 +1,84 @@
+package main
+
+import (
+	"log/slog"
+	"net/http"
+	"os"
+
+	_ "media-processing-platform/server/docs"
+	"media-processing-platform/server/internal/config"
+	router "media-processing-platform/server/internal/delivery/http"
+	"media-processing-platform/server/internal/infrastructure/postgres"
+	"media-processing-platform/server/internal/infrastructure/rabbitmq"
+	"media-processing-platform/server/internal/repository/postgres"
+	"media-processing-platform/server/internal/service"
+)
+
+const (
+	envLocal = "local"
+	envDev   = "development"
+	envProd  = "production"
+)
+
+// @title           Media Processing Platform API
+// @version         1.0
+// @description     API Server for Media Processing Platform
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Введите токен в формате: Bearer <UUID_токен_сессии>
+func main() {
+	cfg := config.MustLoad()
+
+	logger := setupLogger(cfg.Env)
+	logger = logger.With(slog.String("env", cfg.Env))
+
+	logger.Info("initializing server", slog.String("address", cfg.Address()))
+	logger.Debug("logger debug mode enabled")
+
+	db := database.InitDB(cfg.DatabaseConfig, logger)
+
+	userRepository := postgres.NewGormUserRepository(db)
+	taskRepository := postgres.NewGormTaskRepository(db)
+	sessionRepository := postgres.NewGormSessionRepository(db)
+
+	connManager, err := rabbitmq.NewConnectionManager(cfg.RabbitMQConfig, logger)
+	if err != nil {
+		logger.Error("fatal: failed to initialize RabbitMQ connection manager", "error", err)
+		os.Exit(1)
+	}
+	defer connManager.Close()
+
+	taskProducer := rabbitmq.NewProducer(connManager, cfg.RabbitMQConfig.QueueName, logger)
+
+	authService := service.NewAuthService(userRepository, sessionRepository)
+	taskService := service.NewTaskService(taskRepository, taskProducer)
+
+	appRouter := router.InitRouter(logger, authService, taskService)
+
+	logger.Info("starting server", slog.String("address", cfg.Address()))
+
+	if err := http.ListenAndServe(cfg.Address(), appRouter); err != nil {
+		logger.Error("failed to start server", "error", err)
+		os.Exit(1)
+	}
+}
+
+func setupLogger(env string) *slog.Logger {
+	var logger *slog.Logger
+
+	switch env {
+	case envLocal:
+		logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	case envDev:
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+	case envProd:
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	default:
+		slog.Error("unknown environment", "environment", env)
+		return nil
+	}
+
+	return logger
+}

@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go build ./...
+      - run: go vet ./...
+      - run: go test ./...
+
+  integration:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate env from secrets
+        run: |
+          cat > .env <<'EOF'
+          SERVER_PORT=8000
+          DB_PORT_HOST=5433
+          DB_USER=user
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_NAME=postgres
+          RABBITMQ_PORT_HOST=5672
+          RABBITMQ_MGMT_PORT_HOST=15672
+          RABBITMQ_USER=guest
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_QUEUE_NAME=task_queue
+          EOF
+      - name: Build images
+        run: make docker-compose-build
+      - name: Run tests
+        run: make docker-compose-test
