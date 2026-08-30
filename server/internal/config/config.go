@@ -5,7 +5,6 @@ import (
 	"log"
 	"net"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/ilyakaznacheev/cleanenv"
@@ -17,17 +16,19 @@ type Config struct {
 	HTTPServer     `yaml:"http_server"`
 	DatabaseConfig `yaml:"db"`
 	RabbitMQConfig `yaml:"rabbitmq"`
+	RedisConfig    `yaml:"redis"`
+	AuthConfig     `yaml:"auth"`
 }
 
 type HTTPServer struct {
 	Host        string        `yaml:"host" env-default:"localhost"`
-	Port        int           `yaml:"port" env-default:"8080"`
+	Port        string        `yaml:"port" env-default:"8080"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
 }
 
 func (s HTTPServer) Address() string {
-	return net.JoinHostPort(s.Host, strconv.Itoa(s.Port))
+	return net.JoinHostPort(s.Host, s.Port)
 }
 
 type DatabaseConfig struct {
@@ -52,6 +53,29 @@ type RabbitMQConnectionConfig struct {
 	InitialBackoff    time.Duration `yaml:"initial_backoff" env-default:"1s"`
 	MaxRetries        int           `yaml:"max_retries" env-default:"5"`
 	ReconnectInterval time.Duration `yaml:"reconnect_interval" env-default:"2s"`
+}
+
+type RedisConfig struct {
+	Host       string                `yaml:"host" env:"REDIS_HOST" env-required:"true"`
+	Port       string                `yaml:"port" env:"REDIS_PORT" env-required:"true"`
+	User       string                `yaml:"user" env:"REDIS_USER" env-required:"true"`
+	Password   string                `yaml:"password" env:"REDIS_PASSWORD" env-required:"true"`
+	DB         int                   `yaml:"db" env:"REDIS_DB" env-default:"0"`
+	Connection RedisConnectionConfig `yaml:"connection"`
+}
+
+func (r RedisConfig) Address() string {
+	return net.JoinHostPort(r.Host, r.Port)
+}
+
+type RedisConnectionConfig struct {
+	MaxRetries  int           `yaml:"max_retries" env-default:"5"`
+	DialTimeout time.Duration `yaml:"dial_timeout" env-default:"5s"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"5s"`
+}
+
+type AuthConfig struct {
+	TTL time.Duration `yaml:"ttl" env-default:"24h"`
 }
 
 func (dbConfig DatabaseConfig) DSN() string {
