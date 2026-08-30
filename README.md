@@ -76,18 +76,18 @@
 ## Технологический стек
 
 - **Язык:** Go 1.26 (горутины, каналы, context)
-- **HTTP:** chi v5 (роутер, мидлвари), swaggo/swag (Swagger), slog-chi
+- **HTTP:** chi v5 (роутер, middleware), swaggo/swag (Swagger), slog-chi
 - **БД:** PostgreSQL 18 + GORM v2 (JSONB-сериализация, auto-migration)
 - **Кэш:** Redis 7 (сессии с TTL)
 - **Брокер:** RabbitMQ 3 (AMQP), `amqp091-go` (persistent-доставка, ack/nack)
 - **Сериализация:** Protocol Buffers (protoc-gen-go, google.protobuf.Struct)
 - **Обработка изображений:** `image`, `image/color`, `disintegration/imaging` (base64 ↔ PNG)
 - **Безопасность:** bcrypt (хеширование паролей)
-- **Метрики:** Prometheus client_golang (histogram, counter), promhttp
+- **Метрики:** Prometheus client_golang (histogram, counter), promhttp, Grafana (provisioning дашбордов)
 - **Логирование:** log/slog (text/JSON по окружению)
 - **Конфигурация:** cleanenv (YAML + переопределение env-переменными)
 - **Инфраструктура:** Docker (multi-stage), docker-compose, GitHub Actions
-- **Тесты:** pytest, requests (интеграционные, e2e-сценарии)
+- **Тесты:** pytest, requests (модульные, интеграционные, e2e-сценарии)
 
 ## Структура репозитория
 
@@ -104,7 +104,7 @@ media-processing-platform/
 │   ├── config/config.yaml
 │   ├── docs/                       # сгенерированный Swagger
 │   └── internal/
-│       ├── delivery/http/          # роуты, хендлеры, мидлвари, DTO
+│       ├── delivery/http/          # роуты, хендлеры, middleware, DTO
 │       ├── service/                # бизнес-логика
 │       ├── repository/             # интерфейсы + реализации (postgres/redis)
 │       ├── domain/                 # доменные модели
@@ -159,7 +159,7 @@ cp .env.example .env
 # 2. Собрать образы
 make docker-compose-build
 
-# 3. �-апустить весь стек (server, processor, postgres, rabbitmq, redis, prometheus, grafana)
+# 3. Запустить весь стек (server, processor, postgres, rabbitmq, redis, prometheus, grafana)
 make docker-compose-up
 
 # 4. Остановить
@@ -220,7 +220,7 @@ CI (GitHub Actions) выполняет `go build`/`go vet`/`go test` и прог
 ## Решение проблем
 
 **Тест падает: «task is still in progress!»**
-�-адача не обрабатывается воркером. Проверьте: запущен ли `processor` (`docker compose ps`), читает ли он очередь (`docker logs deployments-processor-1`), и совпадает ли имя очереди у сервера и воркера (`RABBITMQ_QUEUE_NAME`).
+Задача не обрабатывается воркером. Проверьте: запущен ли `processor` (`docker compose ps`), читает ли он очередь (`docker logs deployments-processor-1`), и совпадает ли имя очереди у сервера и воркера (`RABBITMQ_QUEUE_NAME`).
 
 **API не стартует: «connection refused» к RabbitMQ/Postgres**
 Скорее всего, не совпадают пароли между `.env` и контейнерами. RabbitMQ берёт креды из `RABBITMQ_DEFAULT_USER/PASS` (см. `deployments/docker-compose.yml`) - они должны совпадать с `RABBITMQ_USER/RABBITMQ_PASSWORD` в `.env`.
@@ -229,7 +229,7 @@ CI (GitHub Actions) выполняет `go build`/`go vet`/`go test` и прог
 Убедитесь, что воркер пересобран с метриками (`make docker-compose-build`) и порт 2112 опубликован (`PROCESSOR_PORT`).
 
 **Grafana не видит Prometheus**
-Проверьте датасорс в `deployments/grafana/provisioning/datasources/` - URL должен указывать на `http://prometheus:9090`.
+Проверьте datasource в `deployments/grafana/provisioning/datasources/` - URL должен указывать на `http://prometheus:9090`.
 
 ## Лицензия
 
