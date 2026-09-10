@@ -14,6 +14,16 @@ db:
   dbname: "postgres"
   port: "5433"
   sslmode: "disable"
+redis:
+  host: "localhost"
+  port: "6379"
+  user: "default"
+  password: "password"
+  db: 0
+  connection:
+    max_retries: 5
+    dial_timeout: 5s
+    timeout: 5s
 rabbitmq:
   host: "localhost"
   port: "5672"
@@ -24,3 +34,5 @@ rabbitmq:
     initial_backoff: 1s
     max_retries: 5
     reconnect_interval: 2s
+auth:
+  ttl: 24h

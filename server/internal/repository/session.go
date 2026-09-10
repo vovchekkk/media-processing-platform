@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -9,7 +10,7 @@ import (
 )
 
 type Session interface {
-	CreateSession(ctx context.Context, session *domain.Session) error
+	CreateSession(ctx context.Context, session *domain.Session, ttl time.Duration) error
 	GetSessionByID(ctx context.Context, sessionID uuid.UUID) (*domain.Session, error)
 	DeleteSession(ctx context.Context, sessionID uuid.UUID) error
 }

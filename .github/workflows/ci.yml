@@ -35,6 +35,10 @@ jobs:
           RABBITMQ_USER=rmquser
           RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
           RABBITMQ_QUEUE_NAME=task_queue
+          REDIS_PORT: 6379
+          REDIS_USER: default
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+          REDIS_DB: 0
           EOF
       - name: Build images
         run: make docker-compose-build
