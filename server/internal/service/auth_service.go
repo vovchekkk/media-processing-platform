@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
+	"media-processing-platform/server/internal/config"
 	"media-processing-platform/server/internal/domain"
 	"media-processing-platform/server/internal/dto"
 	"media-processing-platform/server/internal/repository"
-	"media-processing-platform/server/internal/config"
 )
 
 type AuthService struct {

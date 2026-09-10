@@ -9,12 +9,12 @@ import (
 	_ "media-processing-platform/server/docs"
 	"media-processing-platform/server/internal/config"
 	router "media-processing-platform/server/internal/delivery/http"
-	"media-processing-platform/server/internal/service"
 	postgresInfrastructure "media-processing-platform/server/internal/infrastructure/postgres"
 	"media-processing-platform/server/internal/infrastructure/rabbitmq"
+	redisInfrastructure "media-processing-platform/server/internal/infrastructure/redis"
 	postgresRepo "media-processing-platform/server/internal/repository/postgres"
 	redisRepo "media-processing-platform/server/internal/repository/redis"
-	redisInfrastructure "media-processing-platform/server/internal/infrastructure/redis"
+	"media-processing-platform/server/internal/service"
 )
 
 const (

@@ -4,17 +4,17 @@ import (
 	"context"
 	"log/slog"
 	"media-processing-platform/processor/internal/config"
+	router "media-processing-platform/processor/internal/delivery/http"
 	"media-processing-platform/processor/internal/filter"
 	postgresInfrastructure "media-processing-platform/processor/internal/infrastructure/postgres"
 	"media-processing-platform/processor/internal/infrastructure/rabbitmq"
 	"media-processing-platform/processor/internal/metrics"
 	postgresRepo "media-processing-platform/processor/internal/repository/postgres"
 	"media-processing-platform/processor/internal/service"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
-	router "media-processing-platform/processor/internal/delivery/http"
-	"net/http"
 )
 
 const (
