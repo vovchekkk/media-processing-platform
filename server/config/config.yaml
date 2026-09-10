@@ -10,15 +10,15 @@ http_server:
 db:
   host: "localhost"
   user: "user"
-  password: "password"
+  password: "change_me"
   dbname: "postgres"
   port: "5433"
   sslmode: "disable"
 rabbitmq:
   host: "localhost"
   port: "5672"
-  user: "guest"
-  password: "guest"
+  user: "rmq_user"
+  password: "change_me"
   queue_name: "task_queue"
   connection:
     initial_backoff: 1s

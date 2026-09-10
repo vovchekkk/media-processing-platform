@@ -32,7 +32,7 @@ jobs:
           DB_NAME=postgres
           RABBITMQ_PORT_HOST=5672
           RABBITMQ_MGMT_PORT_HOST=15672
-          RABBITMQ_USER=guest
+          RABBITMQ_USER=rmquser
           RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
           RABBITMQ_QUEUE_NAME=task_queue
           EOF
