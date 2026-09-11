@@ -25,20 +25,21 @@ jobs:
       - name: Generate env from secrets
         run: |
           cat > .env <<'EOF'
-          SERVER_PORT=8000
+          PROCESSOR_PORT=2112
           DB_PORT_HOST=5433
           DB_USER=user
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_NAME=postgres
           RABBITMQ_PORT_HOST=5672
           RABBITMQ_MGMT_PORT_HOST=15672
-          RABBITMQ_USER=rmquser
+          RABBITMQ_USER=rmq_user
           RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
           RABBITMQ_QUEUE_NAME=task_queue
-          REDIS_PORT: 6379
-          REDIS_USER: default
-          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-          REDIS_DB: 0
+          REDIS_PORT_HOST=6379
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_DB=0
+          PROMETHEUS_PORT_HOST=9090
+          GRAFANA_PORT_HOST=3000
           EOF
       - name: Build images
         run: make docker-compose-build
