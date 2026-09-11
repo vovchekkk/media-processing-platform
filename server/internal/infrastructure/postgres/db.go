@@ -38,15 +38,6 @@ func InitDB(cfg config.DatabaseConfig, log *slog.Logger) *gorm.DB {
 
 	log.Info("running database auto-migrations...")
 
-	if db.Migrator().HasTable("sessions") {
-		log.Warn("legacy 'sessions' table found, dropping it...")
-		if err := db.Migrator().DropTable("sessions"); err != nil {
-			log.Error("failed to drop sessions table", "error", err)
-			os.Exit(1)
-		}
-		log.Info("legacy 'sessions' table successfully dropped")
-	}
-
 	if err := db.AutoMigrate(
 		&domain.User{},
 		&domain.Task{},
