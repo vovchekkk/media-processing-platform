@@ -87,11 +87,17 @@ func (connectionManager *ConnectionManager) reconnectLoop() {
 			case <-connectionManager.done:
 				return
 			default:
-				if err := connectionManager.connectWithRetry(); err == nil {
-					connectionManager.log.Info("successfully reconnected to RabbitMQ")
-					break
-				}
-				time.Sleep(connectionManager.cfg.Connection.ReconnectInterval)
+			}
+
+			if err := connectionManager.connectWithRetry(); err == nil {
+				connectionManager.log.Info("successfully reconnected to RabbitMQ")
+				break
+			}
+
+			select {
+			case <-connectionManager.done:
+				return
+			case <-time.After(connectionManager.cfg.Connection.ReconnectInterval):
 			}
 		}
 	}
