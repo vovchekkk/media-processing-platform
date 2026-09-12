@@ -39,10 +39,10 @@ func (r *redisSession) GetSessionByID(ctx context.Context, sessionID uuid.UUID) 
 	userID, err := r.db.Get(ctx, key).Result()
 	if err != nil {
 		if errors.Is(err, redis.Nil) {
-            return nil, domain.ErrSessionNotFound
-        }
+			return nil, domain.ErrSessionNotFound
+		}
 
-        return nil, err
+		return nil, err
 	}
 
 	parsedUserID, err := uuid.Parse(userID)
@@ -51,7 +51,7 @@ func (r *redisSession) GetSessionByID(ctx context.Context, sessionID uuid.UUID) 
 	}
 
 	return &domain.Session{
-		ID: sessionID,
+		ID:     sessionID,
 		UserID: parsedUserID,
 	}, nil
 }

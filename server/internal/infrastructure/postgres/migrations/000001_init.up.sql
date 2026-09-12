@@ -1,5 +1,4 @@
-DROP TABLE IF EXISTS tasks, sessions, users CASCADE;
-
+-- Active: 1786720779745@@127.0.0.1@5433@postgres@public
 CREATE TABLE users (
     id UUID PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
@@ -13,13 +12,6 @@ CREATE TABLE tasks (
     image TEXT,
     status VARCHAR(255) NOT NULL DEFAULT 'in_progress',
     result TEXT,
-
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
-CREATE TABLE sessions (
-    id UUID PRIMARY KEY,
-    user_id UUID NOT NULL,
 
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users (id)
 );

@@ -28,6 +28,12 @@ services:
       REDIS_DB: ${REDIS_DB}
     volumes:
       - ../server/config/config.yaml:/app/server/config/config.yaml:ro
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/swagger/index.html || exit 1"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     depends_on:
       postgres:
         condition: service_healthy
@@ -146,7 +152,7 @@ services:
              pytest tests/tests.py"
     depends_on:
       server:
-        condition: service_started
+        condition: service_healthy
       processor:
         condition: service_started
       prometheus:

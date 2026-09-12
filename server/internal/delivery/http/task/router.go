@@ -10,7 +10,7 @@ import (
 
 func RegisterRoutes(r chi.Router, log *slog.Logger, taskService *service.TaskService) {
 	handler := NewTaskHandler(log, taskService)
-	
+
 	r.Post("/task", handler.Create)
 	r.Get("/status/{task_id}", handler.GetStatus)
 	r.Get("/result/{task_id}", handler.GetResult)

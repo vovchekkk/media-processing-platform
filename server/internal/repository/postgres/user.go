@@ -30,10 +30,10 @@ func (r *gormUser) GetByUsername(ctx context.Context, username string) (*domain.
 	err := r.db.WithContext(ctx).First(&user, "username = ?", username).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-            return nil, domain.ErrUserNotFound
-        }
+			return nil, domain.ErrUserNotFound
+		}
 
-        return nil, err
+		return nil, err
 	}
 
 	return &user, nil

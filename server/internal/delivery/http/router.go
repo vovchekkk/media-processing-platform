@@ -9,9 +9,9 @@ import (
 	slogchi "github.com/samber/slog-chi"
 	httpSwagger "github.com/swaggo/http-swagger"
 
+	"media-processing-platform/server/internal/delivery/http/auth"
 	"media-processing-platform/server/internal/delivery/http/task"
 	"media-processing-platform/server/internal/service"
-	"media-processing-platform/server/internal/delivery/http/auth"
 )
 
 func InitRouter(log *slog.Logger, authService *service.AuthService, taskService *service.TaskService) http.Handler {
