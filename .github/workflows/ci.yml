@@ -25,6 +25,7 @@ jobs:
       - name: Generate env from secrets
         run: |
           cat > .env <<'EOF'
+          SERVER_PORT=8000
           PROCESSOR_PORT=2112
           DB_PORT_HOST=5433
           DB_USER=user
